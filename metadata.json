@@ -1,0 +1,8 @@
+{
+  "name": "SpecialTech AI ERP_32",
+  "description": "Система операционного учёта, диспетчеризации и аналитики аренды строительной спецтехники с AI-ассистентом руководителя",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

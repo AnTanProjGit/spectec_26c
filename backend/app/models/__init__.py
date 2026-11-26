@@ -1,0 +1,120 @@
+from app.core.database import Base
+from app.models.admin import RoleAccessPolicy, SystemAdminConfigModel, TableRegistry, User
+from app.models.audit import AnomalyAlert, FuelAuditLog
+from app.models.branch import (
+    Branch,
+    BranchDocumentFlow,
+    BranchFixedOverhead,
+    BranchOverheadDetail,
+    BranchPeriodLedger,
+)
+from app.models.crm import (
+    CRMDeal,
+    ClientCommunication,
+    DealConfirmation,
+    DealShiftLog,
+    DealStageHistory,
+    MaxCustomerBotConfig,
+)
+from app.models.customer import (
+    Client,
+    ClientBalanceMonthly,
+    ClientContact,
+    ConstructionSite,
+)
+from app.models.driver import (
+    Driver,
+    DriverCard,
+    DriverCardTransaction,
+    DriverEquipmentBinding,
+    DriverPayrollMonthly,
+    DriverTimesheetDay,
+)
+from app.models.erp import (
+    AccountingSubject,
+    Contract,
+    CostAllocationMonthly,
+    LegalDispute,
+    LegalHistory,
+    OneCSyncLog,
+    RentalOrder,
+    StatusNotification,
+    StatusNotificationSettings,
+)
+from app.models.fleet import (
+    Equipment,
+    EquipmentCategory,
+    EquipmentTariff,
+    EquipmentTelemetryBinding,
+    EquipmentTelemetryDaily,
+)
+from app.models.forms import ClosingDocument, ShiftReport, Waybill, WorkActItem
+from app.models.maintenance import MaintenanceLog, ServiceSchedule, SparePartUsage
+from app.models.rag import DocumentChunk, KnowledgeDocument, RetrievalLog
+from app.models.subrent import (
+    PrivateContractor,
+    SubrentContract,
+    SubrentEquipment,
+    SubrentSettlement,
+    SubrentShift,
+)
+
+__all__ = [
+    "Base",
+    "Branch",
+    "BranchDocumentFlow",
+    "BranchFixedOverhead",
+    "BranchOverheadDetail",
+    "BranchPeriodLedger",
+    "Client",
+    "ClientContact",
+    "ConstructionSite",
+    "ClientBalanceMonthly",
+    "EquipmentCategory",
+    "Equipment",
+    "EquipmentTariff",
+    "EquipmentTelemetryDaily",
+    "EquipmentTelemetryBinding",
+    "ServiceSchedule",
+    "MaintenanceLog",
+    "SparePartUsage",
+    "Driver",
+    "DriverEquipmentBinding",
+    "DriverTimesheetDay",
+    "DriverCard",
+    "DriverCardTransaction",
+    "DriverPayrollMonthly",
+    "PrivateContractor",
+    "SubrentContract",
+    "SubrentEquipment",
+    "SubrentShift",
+    "SubrentSettlement",
+    "CRMDeal",
+    "DealShiftLog",
+    "DealStageHistory",
+    "ClientCommunication",
+    "DealConfirmation",
+    "MaxCustomerBotConfig",
+    "AccountingSubject",
+    "Contract",
+    "LegalDispute",
+    "LegalHistory",
+    "RentalOrder",
+    "CostAllocationMonthly",
+    "OneCSyncLog",
+    "StatusNotificationSettings",
+    "StatusNotification",
+    "ShiftReport",
+    "Waybill",
+    "ClosingDocument",
+    "WorkActItem",
+    "AnomalyAlert",
+    "FuelAuditLog",
+    "KnowledgeDocument",
+    "DocumentChunk",
+    "RetrievalLog",
+    "User",
+    "RoleAccessPolicy",
+    "SystemAdminConfigModel",
+    "TableRegistry",
+]

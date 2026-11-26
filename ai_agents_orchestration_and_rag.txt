@@ -1,0 +1,238 @@
+================================================================================
+SPECIALTECH AI ERP — СХЕМА ОРКЕСТРАЦИИ ИИ-АГЕНТОВ И ПАЙПЛАЙН RAG
+================================================================================
+Версия: 1.2.1 (актуализировано под server.ts, AdminPanelView и db/schema.sql v2.1.0)
+Текущий runtime SDK: @google/genai (^2.4.0) в Node.js/Express (server.ts)
+Целевой фреймворк оркестрации: LangGraph / LangChain Core (Python FastAPI)
+Базовые LLM модели (по умолчанию в конфиге):
+  - Основная модель аналитики и чата: gemini-4-hydrogen
+  - Допустимые модели чата/админ-панели: gemini-4-hydrogen, gemini-3.1-flash-lite,
+    gemini-4-neon, gemini-4-carbon, gemini-4-argon, gemini-2.5-pro, gemini-2.5-flash
+  - Эмбеддинги RAG: text-embedding-004 (768 dimensions)
+Векторная база данных: PostgreSQL pgvector (HNSW) / FAISS (faiss_hnsw, faiss_flat) / локальный гибридный поиск
+================================================================================
+
+1. ОБЩАЯ КОНЦЕПЦИЯ И ТЕКУЩЕЕ СОСТОЯНИЕ РЕАЛИЗАЦИИ
+--------------------------------------------------------------------------------
+Мультиагентная система SpecialTech AI ERP построена по паттерну "Hierarchical
+Multi-Agent Orchestration with Dynamic Routing and RAG Grounding".
+
+Что работает в текущем runtime (`server.ts`, порт 3000):
+1. `POST /api/ai-analyst` — серверный прокси к Gemini API (модель по умолчанию
+   `gemini-4-hydrogen`, параметры управляются из Админ-панели: `temperature`,
+   `topP`, `maxOutputTokens`, `systemInstructionSuffix`). Обслуживает 6 агентов:
+   `executive`, `profitability`, `audit`, `crm`, `maintenance`, `legal`.
+   При отсутствии `GEMINI_API_KEY` или ошибке API автоматически срабатывает
+   детерминированный `local_expert_engine_fallback` на реальных цифрах контекста.
+2. `POST /api/chat-agent` — встроенный LLM-агент раздела «Операционный чат»
+   (`ChatView.tsx`), использующий `ThinkingLevel.LOW` и строгую JSON-схему ответа
+   (`responseSchema`: `answer`, `chatSummary`, `suggestedReply`, `matchedSources[]`).
+   Выполняет поиск фактов сразу по 8 контекстам: переписка чата, База знаний,
+   CRM-сделки, заказы-наряды, парк техники, водители, юридический реестр и
+   закрывающие документы (`Акт`, `КС-2`, `КС-3`, `Счёт`), сменные рапорты.
+3. `POST /api/ocr-shift` — распознавание счётчика моточасов/рапорта с фото.
+
+Главные задачи системы:
+1. Автоматический расчёт юнит-экономики каждого часа, смены и участка/филиала.
+2. Непрерывный аудит первичных документов (ЭСМ-7, путевые листы, телематика ГЛОНАСС/ДУТ/CAN).
+3. Предотвращение кассовых разрывов и контроль лимитов дебиторской задолженности.
+4. Проактивное планирование ТО до поломки дорогостоящих узлов (гидравлика, двигатель).
+5. Мгновенный поиск по операционной базе предприятия прямо в чате участка.
+6. Правовая проверка договоров аренды с экипажем и корректности маршрутизации в 1С (ООО / ИП).
+
+--------------------------------------------------------------------------------
+2. БАЗА ЗНАНИЙ И ПАЙПЛАЙН RAG (RETRIEVAL-AUGMENTED GENERATION)
+--------------------------------------------------------------------------------
+
+2.1. Категории и источники документов в Knowledge Base (`KnowledgeDoc.category`):
+- `regulations` (Регламенты):
+  * Положение о расчёте сдельной оплаты труда машинистов и доплат за ночные смены.
+  * Регламент распределения косвенных и условно-постоянных расходов участка
+    (`office_itr_salary`, `aho`, `leasing`, `taxes`, `other`).
+  * Правила актирования простоев по вине заказчика и оформления закрывающих
+    документов (Акт оказанных услуг, КС-2 ОКУД 0322005, КС-3 ОКУД 0322001, Счёт).
+- `fuel_norms` (Нормы ГСМ и карты):
+  * Нормы расхода дизельного топлива на машино-час по маркам техники.
+  * Регламент подотчёта по корпоративным банковским картам водителей и правила
+    внутрипаркового перелива топлива (`payment_category = 'fuel_for_equipment'`).
+- `maintenance` (ТО и ремонт):
+  * Технологические карты ТО (периодичность 250, 500, 1000, 2000 моточасов).
+- `payroll` (Оплата труда и табель):
+  * Тарифная сетка, учёт перегона (`relocationHours`), коды табеля `Я / Н / В / Б / О`.
+- `contracts`, `templates`, `disputes` (Юридический контур):
+  * Договоры аренды спецтехники с экипажем, оферты для ФЛ, допсоглашения, претензии
+    и обезличенные шаблоны (передача в Базу знаний из `ContractsView` через
+    `anonymizeLegalText` со скрытием ИНН/КПП/р/с/телефонов/email).
+
+2.2. Параметры RAG (управляются администратором в `SystemAdminConfig.knowledgeRag`):
+- `storageMode`: `local_hybrid` | `postgres_pgvector` | `onec_sync`
+- `vectorEngine`: `faiss_hnsw` | `faiss_flat` | `pgvector`
+- `embeddingModel`: `text-embedding-004` (768 dimensions)
+- `chunkSizeTokens`: `512` (настраивается: 128–4096)
+- `chunkOverlapTokens`: `64` (настраивается: 0–512)
+- `topK`: `5` (настраивается: 1–25)
+- `minSimilarity`: `0.72` (настраивается: 0.0–1.0)
+- `autoReindexOnSave`: `true`
+- `indexedCategories`: массив активных категорий индексации.
+
+2.3. Архитектура пайплайна RAG:
+[Загрузка / публикация документов (UI KnowledgeBaseView / ContractsView / DOCX / RTF)]
+       ↓
+[Парсер + опциональная анонимизация реквизитов (anonymizeLegalText)]
+       ↓
+[Recursive Character Chunking (chunkSizeTokens: 512, chunkOverlapTokens: 64)]
+       ↓
+[text-embedding-004 (768 dimensions)]
+       ↓
+[PostgreSQL rag.document_chunks (pgvector HNSW / fallback DOUBLE PRECISION[]) или FAISS]
+       ↓
+[Гибридный поиск: Векторный k-NN (cosine >= minSimilarity) + Полнотекстовый поиск]
+       ↓
+[Топ-K чанков (topK=5) + Срез SQL/контекста участка] -> [Инъекция в LLM-агента]
+
+2.4. Схема хранения в БД (раздел `rag` в `db/schema.sql` v2.1.0):
+- `rag.knowledge_documents`: id, code, title, category, date_updated, excerpt, full_text, tags, source_uri (единый общий справочник Базы знаний без разделения по участкам).
+- `rag.document_chunks`: id, document_id, chunk_index, content, token_count, metadata (JSONB),
+  `embedding vector(768)` (или `embedding_fallback DOUBLE PRECISION[]`, если pgvector не установлен).
+- `rag.retrieval_logs`: id, branch_id, agent_type, query_text, top_k, matched_chunk_ids, created_at.
+
+--------------------------------------------------------------------------------
+3. КАРТА И РОЛИ ИИ-АГЕНТОВ (6 АНАЛИТИЧЕСКИХ + 1 ЧАТ-АГЕНТ + MASTER ROUTER)
+--------------------------------------------------------------------------------
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    MASTER ROUTER / SUPERVISOR AGENT                     │
+│    (Анализ намерения пользователя, учет branch_id и LLM-параметров)     │
+└────┬────────────┬────────────┬────────────┬────────────┬───────────┬────┘
+     │            │            │            │            │           │
+     ▼            ▼            ▼            ▼            ▼           ▼
+┌─────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│1. EXEC  │ │2. PROFIT │ │3. AUDIT  │ │4. CRM &  │ │5. MAINT  │ │6. LEGAL  │
+│  AGENT  │ │UNIT-ECON │ │ & GLONASS│ │RECEIVABLE│ │   TCO    │ │ (Юрист)  │
+└─────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘
+                                                                      │
+     ┌────────────────────────────────────────────────────────────────┘
+     ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 7. OPERATIONAL CHAT SEARCH & SUMMARY AGENT (POST /api/chat-agent)       │
+│  ThinkingLevel.LOW + Structured Output -> answer / summary / sources[]  │
+└─────────────────────────────────────────────────────────────────────────┘
+
+1. EXECUTIVE AGENT (`agentType = 'executive'`)
+   - Фокус: Общий P&L компании или изолированного участка, выручка, валовая и
+     операционная маржа, влияние постоянных расходов филиала
+     (`office_itr_salary`, `aho`, `leasing`, `taxes`, `other`).
+   - Выявляет макро-тренды: падение загрузки парка, простой, дебиторскую нагрузку.
+
+2. PROFITABILITY & UNIT-ECONOMICS AGENT (`agentType = 'profitability'`)
+   - Фокус: Маржинальность конкретной единицы техники (в т.ч. выделение самосвалов
+     по рейсам `tripsCount` и пробегу `mileageKm`), сравнение собственной и
+     субарендной техники.
+   - Формула расчёта:
+     Прибыль = Выручка - (ГСМ факт + ЗП машиниста + Ремонт + Трал + Субаренда) - Постоянные и ОХР.
+
+3. AUDIT & ANOMALY DETECTION AGENT (`agentType = 'audit'`)
+   - Фокус: Сверка рапортов ЭСМ-7, данных телематики ГЛОНАСС/ДУТ/CAN-шины и
+     расходов по корпоративным банковским картам водителей.
+   - Пороги из `TelemetrySensorsAdminSettings` (Админ-панель):
+     * `fuelDrainThresholdLiters` (15 л) — порог резкого падения уровня ДУТ (слив).
+     * `fuelRefuelThresholdLiters` (20 л) — минимальная заправка для фиксации по ДУТ.
+     * `hourMeterTolerancePercent` (8%) — допустимое расхождение рапорта vs CAN-шина.
+     * `geofenceRadiusMeters` (250 м) — контроль выхода из геозоны объекта.
+     * `idleEngineAlertMinutes` (30 мин) — критический холостой ход ДВС.
+   - Неблокирующий регламент: при перерасходе ГСМ (> 10%) техника НЕ блокируется;
+     создаётся запись в `audit.anomaly_alerts` и `audit.fuel_audit_logs`,
+     учитываются внутрипарковые переливы (`fuel_for_equipment`), водителю
+     уходит уведомление для отчёта в конце месяца.
+
+4. CRM & RECEIVABLES AGENT (`agentType = 'crm'`)
+   - Фокус: Дебиторская задолженность, просроченные счета (`invoiceStatus = 'overdue'`),
+     незакрытые акты/КС-2/КС-3 и воронка сделок.
+   - Контроль правила: завершённые сделки с нулевым долгом архивируются через 48 ч;
+     при возникновении долга сделка возвращается в активную работу.
+
+5. FLEET & MAINTENANCE AGENT (`agentType = 'maintenance'`)
+   - Фокус: Остаток моточасов до регламентного ТО (`nextMaintenanceInHours`),
+     предупреждение за 20–50 м/ч, простои в ремзоне, оценка TCO.
+
+6. LEGAL AGENT (`agentType = 'legal'`)
+   - Фокус: Экспертиза договоров аренды с экипажем, актов ЭСМ-7 / КС-2 (ОКУД 0322005) /
+     КС-3 (ОКУД 0322001), претензий по простоям и повреждениям.
+   - Контроль двухконтурной маршрутизации в 1С:
+     * `ooo_specialtech` (ОСНО, НДС 20%) — юридические лица по договору.
+     * `ip_specialtechnica` (УСН 6%, Без НДС) — физические лица по договору или оферте/СБП.
+
+7. OPERATIONAL CHAT SEARCH & SUMMARY AGENT (`POST /api/chat-agent`)
+   - Работает в контексте переписки операционного чата выбранного участка (`ChatView.tsx`).
+   - Использует `ThinkingLevel.LOW` и строгий JSON `responseSchema`:
+     * `answer`: точный ответ без выдумывания цифр;
+     * `chatSummary`: краткая сводка по сообщениям чата, реквизитам и подтверждениям;
+     * `suggestedReply`: готовый шаблон сообщения для отправки в чат;
+     * `matchedSources[]`: ссылки на найденные записи (`chat`, `knowledge`, `crm`,
+       `order`, `fleet`, `driver`, `legal`, `closing_doc`).
+
+--------------------------------------------------------------------------------
+4. ОРКЕСТРАЦИЯ В LANGGRAPH (ЦЕЛЕВАЯ STATE GRAPH SPECIFICATION)
+--------------------------------------------------------------------------------
+
+4.1. Состояние графа (`AgentState`):
+```python
+from typing import Annotated, Sequence, TypedDict
+from langchain_core.messages import BaseMessage
+import operator
+
+class AgentState(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], operator.add]
+    branch_id: str | None
+    sender: str
+    target_agent: str
+    user_role: str
+    sql_queries: list[str]
+    sql_results: list[dict]
+    rag_context: list[str]
+    telemetry_thresholds: dict
+    detected_anomalies: list[dict]
+    financial_kpi: dict
+    final_report: dict
+```
+
+4.2. Алгоритм исполнения узлов графа:
+1. `router_node`: классифицирует запрос и учитывает фильтр `branch_id` и политику RBAC.
+2. `sql_generation_node`: строит read-only `SELECT` по 12 доменным схемам (`branch`, `customer`, `fleet`, `driver`, `crm`, `erp`, `forms`, `audit`).
+3. `sql_execution_node`: выполняет запрос в read-only транзакции с timeout 3000ms и `LIMIT 200`.
+4. `rag_retrieval_node`: извлекает релевантные чанки из `rag.document_chunks` (`topK`, `minSimilarity`).
+5. `specialized_agent_node`: производит расчёт по формулам юнит-экономики или правовую сверку.
+6. `evaluator_anomaly_node`: проверяет триггеры ГЛОНАСС/ДУТ/CAN и дебиторской задолженности.
+7. `synthesizer_node`: возвращает структурированный JSON (`role`, `executiveSummary`, `keyFindings`, `calculatedMetrics`, `actionableSteps`).
+
+--------------------------------------------------------------------------------
+5. СПЕЦИФИКАЦИЯ ИНСТРУМЕНТОВ И БЕЗОПАСНЫЙ SANDBOX
+--------------------------------------------------------------------------------
+
+1. `tool_read_database(sql_query: str)`:
+   - Валидация через SQL AST-парсер (`sqlglot` / `pglast`), строго `SELECT / WITH`.
+   - Автоматический фильтр по `branch_id` и `LIMIT 200`.
+
+2. `tool_rag_search(query: str, category: str | None = None, top_k: int = 5)`:
+   - Векторный поиск по `rag.document_chunks` с порогом `minSimilarity` (по умолчанию 0.72).
+
+3. `tool_calculate_operating_profit(...)`:
+   - Детерминированный расчёт без галлюцинаций LLM (`DirectCosts`, `FixedOverheads`, `Margin%`).
+
+4. `tool_create_anomaly_alert(...)`:
+   - Запись в `audit.anomaly_alerts` и `audit.fuel_audit_logs`, пуш в операционный чат участка при включённом `sendAlertsToOperationalChat`.
+
+5. `tool_reallocate_card_expense_and_fuel(...)`:
+   - Обработка отметки «Платежи» (`fuel_for_equipment`): переброс литров и суммы с карты
+     отдающего водителя на экономику принимающей техники (`payment_target_equipment_id`).
+
+--------------------------------------------------------------------------------
+6. ДЕТЕМИНИРОВАННЫЙ РЕЗЕРВНЫЙ ДВИЖОК (FALLBACK В server.ts)
+--------------------------------------------------------------------------------
+В текущей реализации `server.ts` при отсутствии `GEMINI_API_KEY` или временной
+недоступности внешнего API для `/api/ai-analyst` срабатывает локальный экспертный
+генератор `buildLocalFallbackAnalysis(agentType, contextData)`, который рассчитывает
+реальные KPI по переданному контексту (выручка, прямые затраты, постоянные расходы
+участка, прибыль, маржа, загрузка, простой, ТО, аномалии и маршрутизация 1С ООО/ИП)
+и возвращает идентичный JSON-контракт с `source: "local_expert_engine_fallback"`.
+================================================================================

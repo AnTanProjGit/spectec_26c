@@ -1,0 +1,755 @@
+{\rtf1\ansi\deff0\nouicompat{\fonttbl{\f0\fnil\fcharset204 Calibri;}{\f1\fnil Calibri;}{\f2\fnil\fcharset0 Calibri;}{\f3\fnil\fcharset1 Segoe UI Symbol;}}
+{\*\generator Riched20 10.0.19041}\viewkind4\uc1 
+\pard\sl276\slmult1\f0\fs22\lang1049\'c0\'f0\'f5\'e8\'f2\'e5\'ea\'f2\'f3\'f0\'e0 AI-\'f1\'e8\'f1\'f2\'e5\'ec\'fb \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'ee\'e3\'ee \'f3\'f7\'b8\'f2\'e0 \'e8 \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\'e8 \'f1\'f2\'f0\'ee\'e8\'f2\'e5\'eb\'fc\'ed\'ee\'e9 \'f1\'ef\'e5\'f6\'f2\'e5\'f5\'ed\'e8\'ea\'e8\par
+\'c4\'eb\'ff \'ee\'ef\'e8\'f1\'e0\'ed\'ed\'ee\'e9 \'ea\'ee\'ec\'ef\'e0\'ed\'e8\'e8 \'ff \'e1\'fb \'f0\'e5\'ea\'ee\'ec\'e5\'ed\'e4\'ee\'e2\'e0\'eb \'f0\'e0\'e7\'f0\'e0\'e1\'ee\'f2\'e0\'f2\'fc \'e5\'e4\'e8\'ed\'f3\'fe \'f6\'e8\'f4\'f0\'ee\'e2\'f3\'fe \'ef\'eb\'e0\'f2\'f4\'ee\'f0\'ec\'f3 \'f3\'ef\'f0\'e0\'e2\'eb\'e5\'ed\'e8\'ff \'e0\'f0\'e5\'ed\'e4\'ee\'e9 \'f1\'ef\'e5\'f6\'f2\'e5\'f5\'ed\'e8\'ea\'e8 \f1\emdash  ERP + CRM + BI + AI, \f0\'e2 \'ea\'ee\'f2\'ee\'f0\'ee\'e9 FastAPI \'e2\'fb\'f1\'f2\'f3\'ef\'e0\'e5\'f2 \'ee\'f1\'ed\'ee\'e2\'ed\'fb\'ec backend, PostgreSQL \'f5\'f0\'e0\'ed\'e8\'f2 \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'fb\'e5 \'e4\'e0\'ed\'ed\'fb\'e5, \'e0 AI-\'e0\'e3\'e5\'ed\'f2\'fb \'ee\'e1\'e5\'f1\'ef\'e5\'f7\'e8\'e2\'e0\'fe\'f2 \'e8\'ed\'f2\'e5\'eb\'eb\'e5\'ea\'f2\'f3\'e0\'eb\'fc\'ed\'f3\'fe \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\'f3, \'ea\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'ee\'f8\'e8\'e1\'ee\'ea, \'ee\'e1\'f0\'e0\'e1\'ee\'f2\'ea\'f3 \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'ee\'e2 \'e8 \'ef\'ee\'e4\'e4\'e5\'f0\'e6\'ea\'f3 \'f0\'f3\'ea\'ee\'e2\'ee\'e4\'e8\'f2\'e5\'eb\'ff.\par
+\par
+\'c3\'eb\'e0\'e2\'ed\'e0\'ff \'e8\'e4\'e5\'ff: \'ed\'e5 \'e0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'e7\'e8\'f0\'ee\'e2\'e0\'f2\'fc Excel, \'e0 \'e7\'e0\'ec\'e5\'ed\'e8\'f2\'fc \'f0\'e0\'e7\'f0\'ee\'e7\'ed\'e5\'ed\'ed\'fb\'e9 Excel-\'f3\'f7\'b8\'f2 \'ef\'ee\'eb\'ed\'ee\'f6\'e5\'ed\'ed\'ee\'e9 \'f1\'e8\'f1\'f2\'e5\'ec\'ee\'e9 \'f3\'ef\'f0\'e0\'e2\'eb\'e5\'ed\'e8\'ff \'e1\'e8\'e7\'ed\'e5\'f1\'ee\'ec \'f1 AI-\'e0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\'ee\'ec.\par
+\par
+\'cf\'f0\'e8 \'fd\'f2\'ee\'ec \'e2\'e0\'e6\'ed\'ee: AI \'ed\'e5 \'e4\'ee\'eb\'e6\'e5\'ed \'f1\'e0\'ec\'ee\'f1\'f2\'ee\'ff\'f2\'e5\'eb\'fc\'ed\'ee \'f0\'e0\'f1\'f1\'f7\'e8\'f2\'fb\'e2\'e0\'f2\'fc \'e7\'e0\'f0\'ef\'eb\'e0\'f2\'f3, \'ef\'f0\'e8\'e1\'fb\'eb\'fc \'e8\'eb\'e8 \'f4\'e8\'ed\'e0\'ed\'f1\'ee\'e2\'fb\'e5 \'ee\'e1\'ff\'e7\'e0\'f2\'e5\'eb\'fc\'f1\'f2\'e2\'e0. \'dd\'f2\'e8 \'f0\'e0\'f1\'f7\'b8\'f2\'fb \'e2\'fb\'ef\'ee\'eb\'ed\'ff\'fe\'f2\'f1\'ff \'ef\'f0\'ee\'e3\'f0\'e0\'ec\'ec\'ed\'ee \'ef\'ee \'ef\'f0\'ee\'e2\'e5\'f0\'ff\'e5\'ec\'fb\'ec \'ef\'f0\'e0\'e2\'e8\'eb\'e0\'ec, \'e0 LLM \'e8\'ed\'f2\'e5\'f0\'ef\'f0\'e5\'f2\'e8\'f0\'f3\'e5\'f2 \'f0\'e5\'e7\'f3\'eb\'fc\'f2\'e0\'f2\'fb, \'e2\'fb\'ff\'e2\'eb\'ff\'e5\'f2 \'ee\'f2\'ea\'eb\'ee\'ed\'e5\'ed\'e8\'ff \'e8 \'f4\'ee\'f0\'ec\'e8\'f0\'f3\'e5\'f2 \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e5 \'e2\'fb\'e2\'ee\'e4\'fb.\par
+\'d2\'e5\'f5\'ed\'ee\'eb\'ee\'e3\'e8\'f7\'e5\'f1\'ea\'e8\'e9 \'f1\'f2\'e5\'ea\par
+\'ca\'ee\'ec\'ef\'ee\'ed\'e5\'ed\'f2\tab\'d2\'e5\'f5\'ed\'ee\'eb\'ee\'e3\'e8\'ff\par
+Backend API\tab FastAPI\par
+ORM\tab SQLAlchemy 2.x\par
+\'c1\'e0\'e7\'e0 \'e4\'e0\'ed\'ed\'fb\'f5\tab PostgreSQL\par
+\'cc\'e8\'e3\'f0\'e0\'f6\'e8\'e8\tab Alembic\par
+Frontend\tab React + TypeScript\par
+UI\tab Bootstrap / Ant Design\par
+\'c0\'e2\'f2\'ee\'f0\'e8\'e7\'e0\'f6\'e8\'ff\tab JWT + RBAC\par
+\'ce\'f7\'e5\'f0\'e5\'e4\'e8 \'e7\'e0\'e4\'e0\'f7\tab Celery + Redis\par
+AI-\'ee\'f0\'ea\'e5\'f1\'f2\'f0\'e0\'f2\'ee\'f0\tab LangGraph\par
+LLM\tab GPT / Claude / \'eb\'ee\'ea\'e0\'eb\'fc\'ed\'fb\'e5 \'ec\'ee\'e4\'e5\'eb\'e8\par
+RAG\tab LangChain / LlamaIndex\par
+Vector Search\tab FAISS\par
+BI / \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\'e0\tab SQL + Metabase / \'f1\'ee\'e1\'f1\'f2\'e2\'e5\'ed\'ed\'fb\'e9 dashboard\par
+\'c4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'fb\tab S3 / MinIO\par
+OCR\tab PaddleOCR / \'f1\'ef\'e5\'f6\'e8\'e0\'eb\'e8\'e7\'e8\'f0\'ee\'e2\'e0\'ed\'ed\'fb\'e5 OCR-\'ec\'ee\'e4\'e5\'eb\'e8\par
+\'ca\'ee\'ed\'f2\'e5\'e9\'ed\'e5\'f0\'e8\'e7\'e0\'f6\'e8\'ff\tab Docker + Docker Compose\par
+\'cc\'ee\'ed\'e8\'f2\'ee\'f0\'e8\'ed\'e3\tab Prometheus + Grafana\par
+\'cb\'ee\'e3\'e8\'f0\'ee\'e2\'e0\'ed\'e8\'e5\tab structlog + OpenTelemetry\par
+\par
+2. \'d1\'f5\'e5\'ec\'e0 \'e2\'e7\'e0\'e8\'ec\'ee\'e4\'e5\'e9\'f1\'f2\'e2\'e8\'ff \'ea\'ee\'ec\'ef\'ee\'ed\'e5\'ed\'f2\'ee\'e2\par
+\'cb\'ee\'e3\'e8\'f7\'e5\'f1\'ea\'e0\'ff \'e0\'f0\'f5\'e8\'f2\'e5\'ea\'f2\'f3\'f0\'e0 \'ef\'eb\'e0\'f2\'f4\'ee\'f0\'ec\'fb\par
+Frontend \f1\emdash  React SPA\f0\par
+CRM \f2\lang1033\'b7 ERP \'b7 Dashboard \'b7 AI Assistant\par
+\par
+FastAPI \f1\emdash  API Gateway / Backend\par
+Auth \f2\'b7 RBAC \'b7 Business Logic \'b7 REST API\par
+\par
+PostgreSQL\par
+\f0\lang1049\'ce\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'fb\'e5 \'e4\'e0\'ed\'ed\'fb\'e5\par
+\par
+AI Orchestrator\par
+LLM + LangGraph\par
+\par
+\par
+MinIO / S3\par
+\'c4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'fb \'e8 \'ee\'f2\'f7\'b8\'f2\'fb\par
+\par
+\par
+RAG + FAISS\par
+\'cf\'ee\'e8\'f1\'ea \'e7\'ed\'e0\'ed\'e8\'e9 \'e8 \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'ee\'e2\par
+\par
+Celery + Redis\par
+\'d4\'ee\'ed\'ee\'e2\'fb\'e5 \'e7\'e0\'e4\'e0\'f7\'e8 \f2\lang1033\'b7 OCR \'b7 \f0\lang1049\'ce\'f2\'f7\'b8\'f2\'fb \f2\lang1033\'b7 AI-\f0\lang1049\'e0\'ed\'e0\'eb\'e8\'e7\par
+\par
+3. \'d1\'f2\'f0\'f3\'ea\'f2\'f3\'f0\'e0 backend-\'ef\'f0\'ee\'e5\'ea\'f2\'e0 FastAPI\par
+\'df \'e1\'fb \'f1\'f2\'f0\'ee\'e8\'eb \'ef\'f0\'e8\'eb\'ee\'e6\'e5\'ed\'e8\'e5 \'ec\'ee\'e4\'f3\'eb\'fc\'ed\'ee, \'f1 \'ed\'e5\'e7\'e0\'e2\'e8\'f1\'e8\'ec\'fb\'ec\'e8 \'e1\'e8\'e7\'ed\'e5\'f1-\'e4\'ee\'ec\'e5\'ed\'e0\'ec\'e8. \'cd\'e5 \'f0\'e5\'ea\'ee\'ec\'e5\'ed\'e4\'f3\'fe \'f1\'f0\'e0\'e7\'f3 \'f1\'ee\'e7\'e4\'e0\'e2\'e0\'f2\'fc \'e4\'e5\'f1\'ff\'f2\'ea\'e8 \'ec\'e8\'ea\'f0\'ee\'f1\'e5\'f0\'e2\'e8\'f1\'ee\'e2: \'ed\'e0 \'ed\'e0\'f7\'e0\'eb\'fc\'ed\'ee\'ec \'fd\'f2\'e0\'ef\'e5 \'fd\'f4\'f4\'e5\'ea\'f2\'e8\'e2\'ed\'e5\'e5 Modular Monolith + \'ee\'f2\'e4\'e5\'eb\'fc\'ed\'fb\'e9 AI Worker. \'dd\'f2\'ee \'ef\'f0\'ee\'f9\'e5 \'f1\'ee\'ef\'f0\'ee\'e2\'ee\'e6\'e4\'e0\'f2\'fc, \'e4\'e5\'f8\'e5\'e2\'eb\'e5 \'f0\'e0\'e7\'e2\'e8\'e2\'e0\'f2\'fc \'e8 \'eb\'e5\'e3\'f7\'e5 \'ec\'e0\'f1\'f8\'f2\'e0\'e1\'e8\'f0\'ee\'e2\'e0\'f2\'fc.\par
+specialtech-platform/\par
+\f3\u9474?\f2\lang1033\par
+\f3\u9500?\u9472?\u9472?\f2  backend/\par
+\f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  app/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  main.py\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  core/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  config.py\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  security.py\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  permissions.py\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  logging.py\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  modules/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  auth/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  users/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  companies/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  crm/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  fleet/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  rentals/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  operations/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  drivers/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  timesheets/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  payroll/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  finance/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  maintenance/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  warehouse/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  documents/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  reports/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  tasks/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  analytics/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  kpi/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  profitability/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  forecasting/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  dashboards/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  ai/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  orchestrator/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  agents/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  rag/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  faiss/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  tools/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  prompts/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  evaluation/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  integrations/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  telegram/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  email/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  excel/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  google_sheets/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  gps/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  db/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  session.py\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  base.py\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  models/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  shared/\par
+\f3\u9474?\f2    \f3\u9474?\f2        \f3\u9500?\u9472?\u9472?\f2  schemas/\par
+\f3\u9474?\f2    \f3\u9474?\f2        \f3\u9500?\u9472?\u9472?\f2  services/\par
+\f3\u9474?\f2    \f3\u9474?\f2        \f3\u9492?\u9472?\u9472?\f2  utils/\par
+\f3\u9474?\f2    \f3\u9474?\f2\par
+\f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  alembic/\par
+\f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  tests/\par
+\f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  requirements.txt\par
+\f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  Dockerfile\par
+\f3\u9474?\f2\par
+\f3\u9500?\u9472?\u9472?\f2  frontend/\par
+\f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  src/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  modules/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  dashboard/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  crm/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  fleet/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  rentals/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  operations/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  finance/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  payroll/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  analytics/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  ai-assistant/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  components/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  api/\par
+\f3\u9474?\f2    \f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  layouts/\par
+\f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  package.json\par
+\f3\u9474?\f2\par
+\f3\u9500?\u9472?\u9472?\f2  ai-worker/\par
+\f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  agents/\par
+\f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  rag/\par
+\f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  tasks/\par
+\f3\u9474?\f2\par
+\f3\u9500?\u9472?\u9472?\f2  infra/\par
+\f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  postgres/\par
+\f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  redis/\par
+\f3\u9474?\f2    \f3\u9500?\u9472?\u9472?\f2  minio/\par
+\f3\u9474?\f2    \f3\u9492?\u9472?\u9472?\f2  monitoring/\par
+\f3\u9474?\f2\par
+\f3\u9500?\u9472?\u9472?\f2  docker-compose.yml\par
+\f3\u9500?\u9472?\u9472?\f2  .env\par
+\f3\u9492?\u9472?\u9472?\f2  README.md\par
+\par
+4. \f0\lang1049\'ce\'f1\'ed\'ee\'e2\'ed\'fb\'e5 ERP-\'ec\'ee\'e4\'f3\'eb\'e8\par
+4.1. Fleet Management \f1\emdash  \f0\'ef\'e0\'f0\'ea \'f2\'e5\'f5\'ed\'e8\'ea\'e8\par
+\'ca\'e0\'e6\'e4\'e0\'ff \'e5\'e4\'e8\'ed\'e8\'f6\'e0 \'f2\'e5\'f5\'ed\'e8\'ea\'e8 \'e8\'ec\'e5\'e5\'f2 \'f1\'ee\'e1\'f1\'f2\'e2\'e5\'ed\'ed\'f3\'fe \'ea\'e0\'f0\'f2\'ee\'f7\'ea\'f3:\par
+- \'c8\'ed\'e2\'e5\'ed\'f2\'e0\'f0\'ed\'fb\'e9 \'ed\'ee\'ec\'e5\'f0.\par
+- \'d2\'e8\'ef: \'fd\'ea\'f1\'ea\'e0\'e2\'e0\'f2\'ee\'f0, \'ea\'f0\'e0\'ed, \'f1\'e0\'ec\'ee\'f1\'e2\'e0\'eb, \'ef\'ee\'e3\'f0\'f3\'e7\'f7\'e8\'ea.\par
+- \'cc\'e0\'f0\'ea\'e0, \'ec\'ee\'e4\'e5\'eb\'fc, VIN / \'e7\'e0\'e2\'ee\'e4\'f1\'ea\'ee\'e9 \'ed\'ee\'ec\'e5\'f0.\par
+- \'d1\'ee\'e1\'f1\'f2\'e2\'e5\'ed\'ed\'e8\'ea \'f2\'e5\'f5\'ed\'e8\'ea\'e8.\par
+- \'c4\'e0\'f2\'e0 \'ef\'f0\'e8\'ee\'e1\'f0\'e5\'f2\'e5\'ed\'e8\'ff.\par
+- \'cf\'e5\'f0\'e2\'ee\'ed\'e0\'f7\'e0\'eb\'fc\'ed\'e0\'ff \'f1\'f2\'ee\'e8\'ec\'ee\'f1\'f2\'fc.\par
+- \'d2\'e5\'ea\'f3\'f9\'e0\'ff \'f1\'f2\'ee\'e8\'ec\'ee\'f1\'f2\'fc.\par
+- \'c0\'ec\'ee\'f0\'f2\'e8\'e7\'e0\'f6\'e8\'ff.\par
+- \'d1\'f2\'e0\'f2\'f3\'f1: \'f1\'e2\'ee\'e1\'ee\'e4\'ed\'e0, \'e0\'f0\'e5\'ed\'e4\'e0, \'f0\'e5\'ec\'ee\'ed\'f2, \'f0\'e5\'e7\'e5\'f0\'e2.\par
+- \'c4\'ee\'f1\'f2\'f3\'ef\'ed\'ee\'f1\'f2\'fc.\par
+- \'cd\'e0\'f0\'e0\'e1\'ee\'f2\'ea\'e0 \'ec\'ee\'f2\'ee\'f7\'e0\'f1\'ee\'e2.\par
+- \'d0\'e0\'f1\'f5\'ee\'e4 \'f2\'ee\'ef\'eb\'e8\'e2\'e0.\par
+- \'d0\'e0\'f1\'f5\'ee\'e4\'fb \'ed\'e0 \'f0\'e5\'ec\'ee\'ed\'f2.\par
+- \'c8\'f1\'f2\'ee\'f0\'e8\'ff \'e0\'f0\'e5\'ed\'e4\'fb.\par
+- \'c8\'f1\'f2\'ee\'f0\'e8\'ff \'e4\'ee\'f5\'ee\'e4\'ee\'e2 \'e8 \'ef\'f0\'e8\'e1\'fb\'eb\'e8.\par
+\'cf\'f0\'e8\'ec\'e5\'f0 \'ec\'ee\'e4\'e5\'eb\'e8\par
+\par
+class Equipment(Base):\par
+    __tablename__ = "equipment"\par
+\par
+    id = mapped_column(UUID, primary_key=True)\par
+    inventory_number = mapped_column(String, unique=True)\par
+    name = mapped_column(String)\par
+    equipment_type_id = mapped_column(ForeignKey("equipment_types.id"))\par
+    owner_id = mapped_column(ForeignKey("owners.id"))\par
+    purchase_price = mapped_column(Numeric(14, 2))\par
+    status = mapped_column(String)\par
+    current_hours = mapped_column(Numeric(12, 2))\par
+\par
+4.2. CRM \f1\emdash  \f0\'f3\'ef\'f0\'e0\'e2\'eb\'e5\'ed\'e8\'e5 \'ea\'eb\'e8\'e5\'ed\'f2\'e0\'ec\'e8\par
+CRM \'ee\'f2\'e2\'e5\'f7\'e0\'e5\'f2 \'e7\'e0 \'ea\'ee\'ec\'ec\'e5\'f0\'f7\'e5\'f1\'ea\'f3\'fe \'f7\'e0\'f1\'f2\'fc \'e1\'e8\'e7\'ed\'e5\'f1\'e0.\par
+\'d4\'f3\'ed\'ea\'f6\'e8\'ee\'ed\'e0\'eb\'fc\'ed\'ee\'f1\'f2\'fc:\par
+- \'ca\'eb\'e8\'e5\'ed\'f2\'fb \'e8 \'ea\'ee\'ed\'f2\'f0\'e0\'e3\'e5\'ed\'f2\'fb.\par
+- \'ca\'ee\'ed\'f2\'e0\'ea\'f2\'ed\'fb\'e5 \'eb\'e8\'f6\'e0.\par
+- \'c8\'f1\'f2\'ee\'f0\'e8\'ff \'e2\'e7\'e0\'e8\'ec\'ee\'e4\'e5\'e9\'f1\'f2\'e2\'e8\'ff.\par
+- \'c7\'e0\'ff\'e2\'ea\'e8 \'ed\'e0 \'e0\'f0\'e5\'ed\'e4\'f3.\par
+- \'ca\'ee\'ec\'ec\'e5\'f0\'f7\'e5\'f1\'ea\'e8\'e5 \'ef\'f0\'e5\'e4\'eb\'ee\'e6\'e5\'ed\'e8\'ff.\par
+- \'c4\'ee\'e3\'ee\'e2\'ee\'f0\'fb.\par
+- \'c2\'ee\'f0\'ee\'ed\'ea\'e0 \'ef\'f0\'ee\'e4\'e0\'e6.\par
+- \'ce\'f2\'e2\'e5\'f2\'f1\'f2\'e2\'e5\'ed\'ed\'fb\'e5 \'ec\'e5\'ed\'e5\'e4\'e6\'e5\'f0\'fb.\par
+- \'c4\'e5\'e1\'e8\'f2\'ee\'f0\'f1\'ea\'e0\'ff \'e7\'e0\'e4\'ee\'eb\'e6\'e5\'ed\'ed\'ee\'f1\'f2\'fc.\par
+- \'cf\'ee\'e2\'f2\'ee\'f0\'ed\'fb\'e5 \'e0\'f0\'e5\'ed\'e4\'fb.\par
+- \'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'e8\'f1\'ef\'ee\'eb\'ed\'e5\'ed\'e8\'ff \'e4\'ee\'e3\'ee\'e2\'ee\'f0\'b8\'ed\'ed\'ee\'f1\'f2\'e5\'e9.\par
+\'c2\'ee\'f0\'ee\'ed\'ea\'e0 \'ef\'f0\'ee\'e4\'e0\'e6\par
+\par
+CRM Pipeline\par
+\'cf\'f0\'e8\'ec\'e5\'f0\par
+\'c7\'e0\'ff\'e2\'ea\'e0\tab\tab 24\par
+\'d0\'e0\'f1\'f7\'b8\'f2\tab\tab 16\par
+\'c4\'ee\'e3\'ee\'e2\'ee\'f0\tab 9\par
+\'c0\'f0\'e5\'ed\'e4\'e0\tab\tab 7\par
+\par
+4.3. Rental Management \f1\emdash  \f0\'e0\'f0\'e5\'ed\'e4\'e0 \'f2\'e5\'f5\'ed\'e8\'ea\'e8\par
+\'dd\'f2\'ee \'f6\'e5\'ed\'f2\'f0\'e0\'eb\'fc\'ed\'fb\'e9 \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'fb\'e9 \'ec\'ee\'e4\'f3\'eb\'fc.\par
+\par
+\'d1\'e8\'f1\'f2\'e5\'ec\'e0 \'e4\'ee\'eb\'e6\'ed\'e0 \'ee\'e1\'e5\'f1\'ef\'e5\'f7\'e8\'e2\'e0\'f2\'fc:\par
+1. \'cf\'ee\'eb\'f3\'f7\'e5\'ed\'e8\'e5 \'e7\'e0\'ff\'e2\'ea\'e8.\par
+2. \'cf\'ee\'e4\'e1\'ee\'f0 \'f2\'e5\'f5\'ed\'e8\'ea\'e8 \'ef\'ee \'f2\'e8\'ef\'f3, \'e3\'f0\'f3\'e7\'ee\'ef\'ee\'e4\'fa\'b8\'ec\'ed\'ee\'f1\'f2\'e8 \'e8 \'e4\'ee\'f1\'f2\'f3\'ef\'ed\'ee\'f1\'f2\'e8.\par
+3. \'d0\'e0\'f1\'f7\'b8\'f2 \'f1\'f2\'ee\'e8\'ec\'ee\'f1\'f2\'e8 \'e0\'f0\'e5\'ed\'e4\'fb.\par
+4. \'d1\'ee\'e7\'e4\'e0\'ed\'e8\'e5 \'e4\'ee\'e3\'ee\'e2\'ee\'f0\'e0.\par
+5. \'cd\'e0\'e7\'ed\'e0\'f7\'e5\'ed\'e8\'e5 \'e2\'ee\'e4\'e8\'f2\'e5\'eb\'ff / \'ec\'e0\'f8\'e8\'ed\'e8\'f1\'f2\'e0.\par
+6. \'cd\'e0\'e7\'ed\'e0\'f7\'e5\'ed\'e8\'e5 \'ee\'e1\'fa\'e5\'ea\'f2\'e0.\par
+7. \'d3\'f7\'b8\'f2 \'f1\'ec\'e5\'ed.\par
+8. \'d3\'f7\'b8\'f2 \'f7\'e0\'f1\'ee\'e2.\par
+9. \'d3\'f7\'b8\'f2 \'ef\'f0\'ee\'f1\'f2\'ee\'e5\'e2.\par
+10. \'d4\'ee\'f0\'ec\'e8\'f0\'ee\'e2\'e0\'ed\'e8\'e5 \'e0\'ea\'f2\'e0 \'e2\'fb\'ef\'ee\'eb\'ed\'e5\'ed\'ed\'fb\'f5 \'f0\'e0\'e1\'ee\'f2.\par
+11. \'cd\'e0\'f7\'e8\'f1\'eb\'e5\'ed\'e8\'e5 \'e2\'fb\'f0\'f3\'f7\'ea\'e8.\par
+12. \'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'ee\'ef\'eb\'e0\'f2\'fb.\par
+\'d1\'f3\'f9\'ed\'ee\'f1\'f2\'e8\par
+- RentalRequest\par
+- RentalContract\par
+- RentalOrder\par
+- RentalSchedule\par
+- RentalShift\par
+- RentalAct\par
+- RentalRate\par
+- RentalObject\par
+\par
+4.4. Operational Accounting \f1\emdash  \f0\'ee\'ef\'e5\'f0\'e0\'f2\'e8\'e2\'ed\'fb\'e9 \'f3\'f7\'b8\'f2\par
+\par
+\'c7\'e4\'e5\'f1\'fc \'f4\'ee\'f0\'ec\'e8\'f0\'f3\'e5\'f2\'f1\'ff \'f4\'e0\'ea\'f2\'e8\'f7\'e5\'f1\'ea\'e0\'ff \'fd\'ea\'ee\'ed\'ee\'ec\'e8\'ea\'e0 \'ea\'e0\'e6\'e4\'ee\'e9 \'ec\'e0\'f8\'e8\'ed\'fb.\par
+\'d7\'f2\'ee \'f3\'f7\'e8\'f2\'fb\'e2\'e0\'e5\'f2\'f1\'ff \'e5\'e6\'e5\'e4\'ed\'e5\'e2\'ed\'ee\par
+\'cf\'ee\'ea\'e0\'e7\'e0\'f2\'e5\'eb\'fc\tab\'c8\'f1\'f2\'ee\'f7\'ed\'e8\'ea\par
+\'ce\'f2\'f0\'e0\'e1\'ee\'f2\'e0\'ed\'ed\'fb\'e5 \'f7\'e0\'f1\'fb\tab\'d2\'e0\'e1\'e5\'eb\'fc \'ec\'e0\'f8\'e8\'ed\'e8\'f1\'f2\'e0\par
+\'ce\'f2\'f0\'e0\'e1\'ee\'f2\'e0\'ed\'ed\'fb\'e5 \'f1\'ec\'e5\'ed\'fb\tab\'ce\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'fb\'e9 \'e6\'f3\'f0\'ed\'e0\'eb\par
+\'c2\'fb\'f0\'f3\'f7\'ea\'e0\tab\'c0\'ea\'f2 / \'e7\'e0\'ea\'e0\'e7\par
+\'c7\'e0\'f0\'ef\'eb\'e0\'f2\'e0\tab\'d2\'e0\'e1\'e5\'eb\'fc + \'f2\'e0\'f0\'e8\'f4\par
+\'d2\'ee\'ef\'eb\'e8\'e2\'ee\tab\'c7\'e0\'ef\'f0\'e0\'e2\'ea\'e0 / \'f2\'ee\'ef\'eb\'e8\'e2\'ed\'e0\'ff \'ea\'e0\'f0\'f2\'e0\par
+\'d0\'e5\'ec\'ee\'ed\'f2\tab\'c7\'e0\'ea\'e0\'e7-\'ed\'e0\'f0\'ff\'e4\par
+\'c7\'e0\'ef\'f7\'e0\'f1\'f2\'e8\tab\'d1\'ea\'eb\'e0\'e4\par
+\'d2\'f0\'e0\'ed\'f1\'ef\'ee\'f0\'f2\'e8\'f0\'ee\'e2\'ea\'e0\tab\'cb\'ee\'e3\'e8\'f1\'f2\'e8\'ea\'e0\par
+\'cf\'f0\'ee\'f1\'f2\'ee\'e9\tab\'cf\'f0\'e8\'f7\'e8\'ed\'e0 + \'e4\'eb\'e8\'f2\'e5\'eb\'fc\'ed\'ee\'f1\'f2\'fc\par
+\'cf\'f0\'ee\'f7\'e8\'e5 \'f0\'e0\'f1\'f5\'ee\'e4\'fb\tab\'d4\'e8\'ed\'e0\'ed\'f1\'ee\'e2\'fb\'e5 \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'fb\par
+\par
+\'d0\'e0\'f1\'f7\'b8\'f2 \'ef\'f0\'e8\'e1\'fb\'eb\'e8\par
+\'d0\'e0\'f1\'f7\'b8\'f2 \'ef\'f0\'e8\'e1\'fb\'eb\'e8\par
+\'c4\'eb\'ff \'ea\'e0\'e6\'e4\'ee\'e9 \'ec\'e0\'f8\'e8\'ed\'fb:\par
+\\[\par
+Revenue = BillableHours \\times HourlyRate\par
+\\]\par
+\par
+\\[\par
+ContributionProfit = Revenue - DirectCosts\par
+\\]\par
+\par
+\\[\par
+OperatingProfit = Revenue - DirectCosts - AllocatedOverheads\par
+\\]\par
+\par
+\'c3\'e4\'e5:\par
+- DirectCosts \f1\emdash  \f0\'f2\'ee\'ef\'eb\'e8\'e2\'ee, \'e7\'e0\'f0\'ef\'eb\'e0\'f2\'e0, \'f0\'e5\'ec\'ee\'ed\'f2, \'f2\'f0\'e0\'ed\'f1\'ef\'ee\'f0\'f2\'e8\'f0\'ee\'e2\'ea\'e0 \'e8 \'ef\'f0\'ee\'f7\'e8\'e5 \'ef\'f0\'ff\'ec\'fb\'e5 \'f0\'e0\'f1\'f5\'ee\'e4\'fb.\par
+- AllocatedOverheads \f1\emdash  \f0\'f0\'e0\'f1\'ef\'f0\'e5\'e4\'e5\'eb\'b8\'ed\'ed\'fb\'e5 \'ed\'e0\'ea\'eb\'e0\'e4\'ed\'fb\'e5 \'f0\'e0\'f1\'f5\'ee\'e4\'fb.\par
+- OperatingProfit \f1\emdash  \f0\'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'e0\'ff \'ef\'f0\'e8\'e1\'fb\'eb\'fc \'e2 \'f0\'e0\'ec\'ea\'e0\'f5 \'e2\'fb\'e1\'f0\'e0\'ed\'ed\'ee\'e9 \'ec\'e5\'f2\'ee\'e4\'e8\'ea\'e8 \'f3\'f7\'b8\'f2\'e0.\par
+\'c2\'e0\'e6\'ed\'ee: \'e0\'ec\'ee\'f0\'f2\'e8\'e7\'e0\'f6\'e8\'ff, \'ed\'e0\'eb\'ee\'e3\'e8, \'ef\'f0\'ee\'f6\'e5\'ed\'f2\'fb \'ef\'ee \'ea\'f0\'e5\'e4\'e8\'f2\'e0\'ec \'e8 \'f0\'e0\'f1\'ef\'f0\'e5\'e4\'e5\'eb\'e5\'ed\'e8\'e5 \'ed\'e0\'ea\'eb\'e0\'e4\'ed\'fb\'f5 \'f0\'e0\'f1\'f5\'ee\'e4\'ee\'e2 \'e4\'ee\'eb\'e6\'ed\'fb \'f3\'f7\'e8\'f2\'fb\'e2\'e0\'f2\'fc\'f1\'ff \'ee\'f2\'e4\'e5\'eb\'fc\'ed\'ee \'e8 \'ef\'ee \'f3\'f2\'e2\'e5\'f0\'e6\'e4\'b8\'ed\'ed\'ee\'e9 \'ec\'e5\'f2\'ee\'e4\'e8\'ea\'e5. \'c8\'ed\'e0\'f7\'e5 \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\'e0 \'e1\'f3\'e4\'e5\'f2 \'ef\'ee\'ea\'e0\'e7\'fb\'e2\'e0\'f2\'fc \'ea\'f0\'e0\'f1\'e8\'e2\'f3\'fe, \'ed\'ee \'ed\'e5\'ef\'f0\'e0\'e2\'e8\'eb\'fc\'ed\'f3\'fe \'ef\'f0\'e8\'e1\'fb\'eb\'fc.\par
+\par
+4.5. Timesheets & Payroll \f1\emdash  \f0\'f2\'e0\'e1\'e5\'eb\'e8 \'e8 \'e7\'e0\'f0\'ef\'eb\'e0\'f2\'e0\par
+\par
+\'cf\'f0\'e5\'e4\'eb\'e0\'e3\'e0\'e5\'ec\'e0\'ff \'f1\'e8\'f1\'f2\'e5\'ec\'e0:\par
+- \'cc\'e0\'f8\'e8\'ed\'e8\'f1\'f2 \'ee\'f2\'ef\'f0\'e0\'e2\'eb\'ff\'e5\'f2 \'ee\'f2\'f7\'b8\'f2 \'f7\'e5\'f0\'e5\'e7 \'ec\'ee\'e1\'e8\'eb\'fc\'ed\'fb\'e9 \'e8\'ed\'f2\'e5\'f0\'f4\'e5\'e9\'f1 \'e8\'eb\'e8 Telegram.\par
+- \'d4\'e8\'ea\'f1\'e8\'f0\'f3\'e5\'f2 \'ed\'e0\'f7\'e0\'eb\'ee \'f1\'ec\'e5\'ed\'fb.\par
+- \'d4\'e8\'ea\'f1\'e8\'f0\'f3\'e5\'f2 \'ee\'ea\'ee\'ed\'f7\'e0\'ed\'e8\'e5 \'f1\'ec\'e5\'ed\'fb.\par
+- \'d3\'ea\'e0\'e7\'fb\'e2\'e0\'e5\'f2 \'ec\'ee\'f2\'ee\'f7\'e0\'f1\'fb.\par
+- \'d3\'ea\'e0\'e7\'fb\'e2\'e0\'e5\'f2 \'ee\'e1\'fa\'e5\'ea\'f2.\par
+- \'d4\'e8\'ea\'f1\'e8\'f0\'f3\'e5\'f2 \'ef\'f0\'ee\'f1\'f2\'ee\'e9.\par
+- \'c4\'ee\'e1\'e0\'e2\'eb\'ff\'e5\'f2 \'f4\'ee\'f2\'ee \'f1\'f7\'b8\'f2\'f7\'e8\'ea\'e0 \'ec\'ee\'f2\'ee\'f7\'e0\'f1\'ee\'e2.\par
+- \'d3\'ea\'e0\'e7\'fb\'e2\'e0\'e5\'f2 \'f0\'e0\'f1\'f5\'ee\'e4 \'f2\'ee\'ef\'eb\'e8\'e2\'e0.\par
+- \'ce\'f2\'e2\'e5\'f2\'f1\'f2\'e2\'e5\'ed\'ed\'fb\'e9 \'ef\'f0\'ee\'e2\'e5\'f0\'ff\'e5\'f2 \'e4\'e0\'ed\'ed\'fb\'e5.\par
+- \'d1\'e8\'f1\'f2\'e5\'ec\'e0 \'e2\'fb\'ff\'e2\'eb\'ff\'e5\'f2 \'ee\'f8\'e8\'e1\'ea\'e8.\par
+- \'cf\'ee\'f1\'eb\'e5 \'f3\'f2\'e2\'e5\'f0\'e6\'e4\'e5\'ed\'e8\'ff \'f4\'ee\'f0\'ec\'e8\'f0\'f3\'e5\'f2\'f1\'ff \'f2\'e0\'e1\'e5\'eb\'fc.\par
+- \'d0\'e0\'f1\'f1\'f7\'e8\'f2\'fb\'e2\'e0\'e5\'f2\'f1\'ff \'e7\'e0\'f0\'e0\'e1\'ee\'f2\'ed\'e0\'ff \'ef\'eb\'e0\'f2\'e0.\par
+\'cf\'f0\'e8\'ec\'e5\'f0 \'ef\'f0\'ee\'e2\'e5\'f0\'ea\'e8\par
+\par
+def validate_shift(shift):\par
+    errors = []\par
+\par
+    if shift.end_hours < shift.start_hours:\par
+        errors.append("\'ce\'f2\'f0\'e8\'f6\'e0\'f2\'e5\'eb\'fc\'ed\'e0\'ff \'ed\'e0\'f0\'e0\'e1\'ee\'f2\'ea\'e0")\par
+\par
+    if shift.work_hours > 24:\par
+        errors.append("\'cf\'ee\'e4\'ee\'e7\'f0\'e8\'f2\'e5\'eb\'fc\'ed\'e0\'ff \'e4\'eb\'e8\'f2\'e5\'eb\'fc\'ed\'ee\'f1\'f2\'fc \'f1\'ec\'e5\'ed\'fb")\par
+\par
+    if shift.equipment_id is None:\par
+        errors.append("\'cd\'e5 \'f3\'ea\'e0\'e7\'e0\'ed\'e0 \'f2\'e5\'f5\'ed\'e8\'ea\'e0")\par
+\par
+    if shift.operator_id is None:\par
+        errors.append("\'cd\'e5 \'f3\'ea\'e0\'e7\'e0\'ed \'ec\'e0\'f8\'e8\'ed\'e8\'f1\'f2")\par
+\par
+    return errors\par
+\par
+AI \'ec\'ee\'e6\'e5\'f2 \'e4\'ee\'ef\'ee\'eb\'ed\'e8\'f2\'e5\'eb\'fc\'ed\'ee \'ee\'e1\'ed\'e0\'f0\'f3\'e6\'e8\'f2\'fc:\par
+- \'cf\'ee\'e2\'f2\'ee\'f0\'ff\'fe\'f9\'e8\'e5\'f1\'ff \'ee\'f2\'f7\'b8\'f2\'fb.\par
+- \'cd\'e5\'ee\'e1\'fb\'f7\'ed\'fb\'e5 \'f1\'ea\'e0\'f7\'ea\'e8 \'ec\'ee\'f2\'ee\'f7\'e0\'f1\'ee\'e2.\par
+- \'cd\'e5\'f1\'ee\'ee\'f2\'e2\'e5\'f2\'f1\'f2\'e2\'e8\'e5 \'f4\'ee\'f2\'ee \'e8 \'e7\'e0\'ff\'e2\'eb\'e5\'ed\'ed\'ee\'e3\'ee \'e2\'f0\'e5\'ec\'e5\'ed\'e8.\par
+- \'cf\'ee\'e4\'ee\'e7\'f0\'e8\'f2\'e5\'eb\'fc\'ed\'fb\'e5 \'ed\'e0\'f7\'e8\'f1\'eb\'e5\'ed\'e8\'ff.\par
+- \'d1\'e8\'f1\'f2\'e5\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e5 \'ef\'f0\'ee\'f1\'f2\'ee\'e8.\par
+- \'cf\'ee\'f2\'e5\'ed\'f6\'e8\'e0\'eb\'fc\'ed\'fb\'e5 \'ee\'f8\'e8\'e1\'ea\'e8 \'e2 \'ee\'f2\'f7\'b8\'f2\'e0\'f5.\par
+\par
+5. AI-\'e0\'e3\'e5\'ed\'f2\'fb: \'e8\'ed\'f2\'e5\'eb\'eb\'e5\'ea\'f2\'f3\'e0\'eb\'fc\'ed\'e0\'ff \'f1\'e8\'f1\'f2\'e5\'ec\'e0 \'f3\'ef\'f0\'e0\'e2\'eb\'e5\'ed\'e8\'ff\par
+\'c7\'e4\'e5\'f1\'fc \'ed\'e0\'f7\'e8\'ed\'e0\'e5\'f2\'f1\'ff \'ef\'f0\'e8\'ed\'f6\'e8\'ef\'e8\'e0\'eb\'fc\'ed\'ee\'e5 \'ee\'f2\'eb\'e8\'f7\'e8\'e5 \'ee\'f2 \'ee\'e1\'fb\'f7\'ed\'ee\'e9 ERP.\par
+\par
+\'df \'f0\'e5\'ea\'ee\'ec\'e5\'ed\'e4\'f3\'fe \'ed\'e5 \'ee\'e4\'ed\'ee\'e3\'ee \'f3\'ed\'e8\'e2\'e5\'f0\'f1\'e0\'eb\'fc\'ed\'ee\'e3\'ee \'e0\'e3\'e5\'ed\'f2\'e0, \'e0 AI Multi-Agent System \'f1 \'ee\'f0\'ea\'e5\'f1\'f2\'f0\'e0\'f2\'ee\'f0\'ee\'ec LangGraph.\par
+\par
+\'c0\'f0\'f5\'e8\'f2\'e5\'ea\'f2\'f3\'f0\'e0 AI\par
+AI Orchestrator \f1\emdash  LangGraph\par
+\par
+\f0\'ce\'ef\'f0\'e5\'e4\'e5\'eb\'e5\'ed\'e8\'e5 \'e7\'e0\'e4\'e0\'f7\'e8 \'e8 \'ec\'e0\'f0\'f8\'f0\'f3\'f2\'e8\'e7\'e0\'f6\'e8\'ff\par
+\par
+\'c0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\par
+\par
+\'c4\'ee\'f5\'ee\'e4\'ed\'ee\'f1\'f2\'fc \f2\lang1033\'b7 KPI\par
+\par
+\par
+\f0\lang1049\'ca\'ee\'ed\'f2\'f0\'ee\'eb\'b8\'f0\par
+\par
+\'ce\'f8\'e8\'e1\'ea\'e8 \f2\lang1033\'b7 \f0\lang1049\'c0\'ed\'ee\'ec\'e0\'eb\'e8\'e8\par
+\par
+\par
+CRM-\'e0\'e3\'e5\'ed\'f2\par
+\par
+\'ca\'eb\'e8\'e5\'ed\'f2\'fb \f2\lang1033\'b7 \f0\lang1049\'c7\'e0\'ff\'e2\'ea\'e8\par
+\par
+\par
+\'d2\'e5\'f5\'ed\'e8\'f7\'e5\'f1\'ea\'e8\'e9\par
+\par
+\'d0\'e5\'ec\'ee\'ed\'f2\'fb \f2\lang1033\'b7 \f0\lang1049\'cf\'f0\'ee\'f1\'f2\'ee\'e8\par
+\par
+\par
+\'c4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'e0\'eb\'fc\'ed\'fb\'e9\par
+\par
+OCR \f2\lang1033\'b7 \f0\lang1049\'c4\'ee\'e3\'ee\'e2\'ee\'f0\'fb\par
+\par
+\par
+Executive Agent\par
+\par
+\'ce\'f2\'f7\'b8\'f2\'fb \'f0\'f3\'ea\'ee\'e2\'ee\'e4\'e8\'f2\'e5\'eb\'fe\par
+\par
+\par
+\par
+Tools / Business Services\par
+\par
+SQL \f2\lang1033\'b7 KPI \'b7 RAG \'b7 API \'b7 \f0\lang1049\'cf\'f0\'ee\'e2\'e5\'f0\'e5\'ed\'ed\'fb\'e5 \'f4\'f3\'ed\'ea\'f6\'e8\'e8\par
+\par
+6. RAG + FAISS \f1\emdash  \f0\'ea\'ee\'f0\'ef\'ee\'f0\'e0\'f2\'e8\'e2\'ed\'e0\'ff \'e1\'e0\'e7\'e0 \'e7\'ed\'e0\'ed\'e8\'e9\par
+\par
+
+\pard\sl240\slmult1\par
+\par
+\par
+RAG \'ed\'e5\'ee\'e1\'f5\'ee\'e4\'e8\'ec \'e4\'eb\'ff \'f2\'ee\'e3\'ee, \'f7\'f2\'ee\'e1\'fb AI \'f0\'e0\'e1\'ee\'f2\'e0\'eb \'ed\'e5 \'f2\'ee\'eb\'fc\'ea\'ee \'ed\'e0 \'e7\'ed\'e0\'ed\'e8\'ff\'f5 \'ff\'e7\'fb\'ea\'ee\'e2\'ee\'e9 \'ec\'ee\'e4\'e5\'eb\'e8, \'ed\'ee \'e8 \'ed\'e0 \'f0\'e5\'e0\'eb\'fc\'ed\'fb\'f5 \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'e0\'f5 \'ea\'ee\'ec\'ef\'e0\'ed\'e8\'e8.\par
+\'ca\'e0\'ea\'e8\'e5 \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'fb \'e8\'ed\'e4\'e5\'ea\'f1\'e8\'f0\'f3\'fe\'f2\'f1\'ff\par
+- \'c4\'ee\'e3\'ee\'e2\'ee\'f0\'fb \'e0\'f0\'e5\'ed\'e4\'fb.\par
+- \'ca\'ee\'ec\'ec\'e5\'f0\'f7\'e5\'f1\'ea\'e8\'e5 \'ef\'f0\'e5\'e4\'eb\'ee\'e6\'e5\'ed\'e8\'ff.\par
+- \'c8\'ed\'f1\'f2\'f0\'f3\'ea\'f6\'e8\'e8 \'ef\'ee \'fd\'ea\'f1\'ef\'eb\'f3\'e0\'f2\'e0\'f6\'e8\'e8.\par
+- \'d0\'e5\'e3\'eb\'e0\'ec\'e5\'ed\'f2\'fb \'f0\'e0\'e1\'ee\'f2\'fb.\par
+- \'d2\'e0\'f0\'e8\'f4\'fb.\par
+- \'cf\'f0\'e0\'e2\'e8\'eb\'e0 \'ed\'e0\'f7\'e8\'f1\'eb\'e5\'ed\'e8\'ff \'e7\'e0\'f0\'ef\'eb\'e0\'f2\'fb.\par
+- \'c4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'fb \'ef\'ee \'f0\'e5\'ec\'ee\'ed\'f2\'f3.\par
+- \'c8\'f1\'f2\'ee\'f0\'e8\'ff \'f3\'ef\'f0\'e0\'e2\'eb\'e5\'ed\'f7\'e5\'f1\'ea\'e8\'f5 \'f0\'e5\'f8\'e5\'ed\'e8\'e9.\par
+- \'c8\'ed\'f1\'f2\'f0\'f3\'ea\'f6\'e8\'e8 \'f1\'ee\'f2\'f0\'f3\'e4\'ed\'e8\'ea\'ee\'e2.\par
+- \'c2\'ed\'f3\'f2\'f0\'e5\'ed\'ed\'e8\'e5 \'ef\'ee\'eb\'ee\'e6\'e5\'ed\'e8\'ff \'ea\'ee\'ec\'ef\'e0\'ed\'e8\'e8.\par
+\par
+\'d1\'f5\'e5\'ec\'e0 \'ee\'e1\'f0\'e0\'e1\'ee\'f2\'ea\'e8 \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'ee\'e2\par
+\par
+PDF / DOCX / XLSX / Scans / Emails\par
+                  \f3\u9474?\f2\lang1033\par
+                  \f3\u9660?\f2\par
+          Document Processor\par
+                  \f3\u9474?\f2\par
+          OCR / Extraction\par
+                  \f3\u9474?\f2\par
+                  \f3\u9660?\f2\par
+           Text Chunking\par
+                  \f3\u9474?\f2\par
+                  \f3\u9660?\f2\par
+       Embedding Model\par
+                  \f3\u9474?\f2\par
+                  \f3\u9660?\f2\par
+             FAISS\par
+                  \f3\u9474?\f2\par
+                  \f3\u9660?\f2\par
+          Semantic Search\par
+                  \f3\u9474?\f2\par
+                  \f3\u9660?\f2\par
+          Context Builder\par
+                  \f3\u9474?\f2\par
+                  \f3\u9660?\f2\par
+               LLM\par
+                  \f3\u9474?\f2\par
+                  \f3\u9660?\f2\par
+     Answer + Sources + Confidence\par
+\par
+\f0\lang1049\'c2\'e0\'e6\'ed\'ee\'e5 \'e0\'f0\'f5\'e8\'f2\'e5\'ea\'f2\'f3\'f0\'ed\'ee\'e5 \'f0\'e5\'f8\'e5\'ed\'e8\'e5\par
+\'df \'e1\'fb \'e8\'f1\'ef\'ee\'eb\'fc\'e7\'ee\'e2\'e0\'eb:\par
+- PostgreSQL \f1\emdash  \f0\'e4\'eb\'ff \'e2\'f1\'e5\'f5 \'e1\'e8\'e7\'ed\'e5\'f1-\'e4\'e0\'ed\'ed\'fb\'f5.\par
+- FAISS \f1\emdash  \f0\'e4\'eb\'ff \'e2\'e5\'ea\'f2\'ee\'f0\'ed\'ee\'e3\'ee \'ef\'ee\'e8\'f1\'ea\'e0 \'ef\'ee \'ea\'ee\'f0\'ef\'ee\'f0\'e0\'f2\'e8\'e2\'ed\'fb\'ec \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'e0\'ec.\par
+- MinIO \f1\emdash  \f0\'e4\'eb\'ff \'f5\'f0\'e0\'ed\'e5\'ed\'e8\'ff \'ee\'f0\'e8\'e3\'e8\'ed\'e0\'eb\'ee\'e2 \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'ee\'e2.\par
+- PostgreSQL \f1\emdash  \f0\'e4\'eb\'ff \'ec\'e5\'f2\'e0\'e4\'e0\'ed\'ed\'fb\'f5, \'e2\'e5\'f0\'f1\'e8\'e9, \'ef\'f0\'e0\'e2 \'e4\'ee\'f1\'f2\'f3\'ef\'e0 \'e8 \'f1\'e2\'ff\'e7\'e5\'e9.\par
+- LLM \f1\emdash  \f0\'e4\'eb\'ff \'e0\'ed\'e0\'eb\'e8\'e7\'e0 \'ed\'e0\'e9\'e4\'e5\'ed\'ed\'ee\'e3\'ee \'ea\'ee\'ed\'f2\'e5\'ea\'f1\'f2\'e0.\par
+FAISS \'ed\'e5 \'ff\'e2\'eb\'ff\'e5\'f2\'f1\'ff \'e7\'e0\'ec\'e5\'ed\'ee\'e9 PostgreSQL.\par
+\par
+\'c4\'eb\'ff \'ea\'ee\'f0\'ef\'ee\'f0\'e0\'f2\'e8\'e2\'ed\'ee\'e3\'ee RAG \'ed\'e5\'ee\'e1\'f5\'ee\'e4\'e8\'ec\'ee \'ef\'f0\'e5\'e4\'f3\'f1\'ec\'ee\'f2\'f0\'e5\'f2\'fc \'f4\'e8\'eb\'fc\'f2\'f0\'e0\'f6\'e8\'fe \'ef\'ee \'ef\'f0\'e0\'e2\'e0\'ec \'e4\'ee\'f1\'f2\'f3\'ef\'e0: AI \'ed\'e5 \'e4\'ee\'eb\'e6\'e5\'ed \'e2\'fb\'e4\'e0\'e2\'e0\'f2\'fc \'ef\'ee\'eb\'fc\'e7\'ee\'e2\'e0\'f2\'e5\'eb\'fe \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'fb, \'ea\'ee\'f2\'ee\'f0\'fb\'e5 \'e5\'ec\'f3 \'ed\'e5\'e4\'ee\'f1\'f2\'f3\'ef\'ed\'fb \'e2 \'ee\'e1\'fb\'f7\'ed\'ee\'e9 \'f1\'e8\'f1\'f2\'e5\'ec\'e5.\par
+\'cf\'f0\'e8\'ec\'e5\'f0 \'e2\'ee\'ef\'f0\'ee\'f1\'e0 \'f0\'f3\'ea\'ee\'e2\'ee\'e4\'e8\'f2\'e5\'eb\'ff\par
+\'cf\'ee\'f7\'e5\'ec\'f3 \'fd\'ea\'f1\'ea\'e0\'e2\'e0\'f2\'ee\'f0 \f3\u8470?\f2\lang1033  14 \f0\lang1049\'e7\'e0 \'ef\'ee\'f1\'eb\'e5\'e4\'ed\'e8\'e9 \'ec\'e5\'f1\'ff\'f6 \'ef\'ee\'ea\'e0\'e7\'e0\'eb \'f1\'ed\'e8\'e6\'e5\'ed\'e8\'e5 \'ef\'f0\'e8\'e1\'fb\'eb\'e8?\par
+\par
+AI \'e2\'fb\'ef\'ee\'eb\'ed\'ff\'e5\'f2:\par
+1. SQL-\'e7\'e0\'ef\'f0\'ee\'f1 \'ef\'ee \'e2\'fb\'f0\'f3\'f7\'ea\'e5.\par
+2. SQL-\'e7\'e0\'ef\'f0\'ee\'f1 \'ef\'ee \'f0\'e0\'f1\'f5\'ee\'e4\'e0\'ec.\par
+3. \'d1\'f0\'e0\'e2\'ed\'e5\'ed\'e8\'e5 \'f7\'e0\'f1\'ee\'e2 \'e8 \'ef\'f0\'ee\'f1\'f2\'ee\'e5\'e2.\par
+4. \'cf\'ee\'eb\'f3\'f7\'e5\'ed\'e8\'e5 \'e4\'e0\'ed\'ed\'fb\'f5 \'ef\'ee \'f0\'e5\'ec\'ee\'ed\'f2\'f3.\par
+5. \'cf\'ee\'e8\'f1\'ea \'f0\'e5\'e3\'eb\'e0\'ec\'e5\'ed\'f2\'ee\'e2 \'e8 \'e8\'f1\'f2\'ee\'f0\'e8\'e8 \'e2 RAG.\par
+6. \'d4\'ee\'f0\'ec\'e8\'f0\'ee\'e2\'e0\'ed\'e8\'e5 \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'f7\'e5\'f1\'ea\'ee\'e3\'ee \'e2\'fb\'e2\'ee\'e4\'e0.\par
+\'cf\'f0\'e8\'ec\'e5\'f0 \'ee\'f2\'e2\'e5\'f2\'e0:\par
+\'cf\'f0\'e8\'e1\'fb\'eb\'fc \'f1\'ed\'e8\'e7\'e8\'eb\'e0\'f1\'fc \'ed\'e0 18%. \'ce\'f1\'ed\'ee\'e2\'ed\'fb\'e5 \'f4\'e0\'ea\'f2\'ee\'f0\'fb: \'f3\'e2\'e5\'eb\'e8\'f7\'e5\'ed\'e8\'e5 \'f0\'e5\'ec\'ee\'ed\'f2\'ed\'fb\'f5 \'f0\'e0\'f1\'f5\'ee\'e4\'ee\'e2, 24 \'f7\'e0\'f1\'e0 \'ed\'e5\'e7\'e0\'ef\'eb\'e0\'ed\'e8\'f0\'ee\'e2\'e0\'ed\'ed\'ee\'e3\'ee \'ef\'f0\'ee\'f1\'f2\'ee\'ff \'e8 \'f1\'ed\'e8\'e6\'e5\'ed\'e8\'e5 \'ee\'ef\'eb\'e0\'f7\'e8\'e2\'e0\'e5\'ec\'ee\'e9 \'e7\'e0\'e3\'f0\'f3\'e7\'ea\'e8. \'cd\'e0\'e8\'e1\'ee\'eb\'e5\'e5 \'f1\'f3\'f9\'e5\'f1\'f2\'e2\'e5\'ed\'ed\'fb\'e9 \'f4\'e0\'ea\'f2\'ee\'f0 \f1\emdash  \f0\'f3\'e2\'e5\'eb\'e8\'f7\'e5\'ed\'e8\'e5 \'f0\'e5\'ec\'ee\'ed\'f2\'ed\'fb\'f5 \'e7\'e0\'f2\'f0\'e0\'f2. \'d0\'e5\'ea\'ee\'ec\'e5\'ed\'e4\'f3\'e5\'f2\'f1\'ff \'ef\'f0\'ee\'e2\'e5\'f0\'e8\'f2\'fc \'ef\'ee\'e2\'f2\'ee\'f0\'ff\'e5\'ec\'ee\'f1\'f2\'fc \'ed\'e5\'e8\'f1\'ef\'f0\'e0\'e2\'ed\'ee\'f1\'f2\'e8 \'e3\'e8\'e4\'f0\'e0\'e2\'eb\'e8\'f7\'e5\'f1\'ea\'ee\'e9 \'f1\'e8\'f1\'f2\'e5\'ec\'fb.\par
+\par
+\'dd\'f2\'ee \'e8\'eb\'eb\'fe\'f1\'f2\'f0\'e0\'f6\'e8\'ff \'f4\'ee\'f0\'ec\'e0\'f2\'e0 \'ee\'f2\'e2\'e5\'f2\'e0, \'e0 \'ed\'e5 \'f0\'e5\'e7\'f3\'eb\'fc\'f2\'e0\'f2 \'e0\'ed\'e0\'eb\'e8\'e7\'e0 \'f0\'e5\'e0\'eb\'fc\'ed\'fb\'f5 \'e4\'e0\'ed\'ed\'fb\'f5.\par
+\par
+7. BI \'e8 \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e5 \'ef\'e0\'ed\'e5\'eb\'e8\par
+Dashboard \'f0\'f3\'ea\'ee\'e2\'ee\'e4\'e8\'f2\'e5\'eb\'ff\par
+\par
+\par
+\par
+\'c2 \'e3\'eb\'e0\'e2\'ed\'ee\'ec dashboard \'ff \'e1\'fb \'ef\'f0\'e5\'e4\'f3\'f1\'ec\'ee\'f2\'f0\'e5\'eb \'f1\'eb\'e5\'e4\'f3\'fe\'f9\'e8\'e5 \'e1\'eb\'ee\'ea\'e8.\par
+\'c2\'fb\'f0\'f3\'f7\'ea\'e0 \'e7\'e0 \'ec\'e5\'f1\'ff\'f6\par
+\f2\u8381? 8,42 \f0\'ec\'eb\'ed\par
++12,4% \'ea \'ef\'f0\'ee\'f8\'eb\'ee\'ec\'f3 \'ec\'e5\'f1\'ff\'f6\'f3\par
+\par
+\par
+\'ce\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'e0\'ff \'ef\'f0\'e8\'e1\'fb\'eb\'fc\par
+\f2\u8381? 2,18 \f0\'ec\'eb\'ed\par
+25,9% \'ec\'e0\'f0\'e6\'e0\par
+\par
+\par
+\'c7\'e0\'e3\'f0\'f3\'e7\'ea\'e0 \'ef\'e0\'f0\'ea\'e0\par
+76,8%\par
++4,2 \'ef.\'ef.\par
+\par
+\par
+\'cf\'f0\'ee\'f1\'f2\'ee\'e9 \'f2\'e5\'f5\'ed\'e8\'ea\'e8\par
+11,3%\par
+\'c2\'fb\'f8\'e5 \'f6\'e5\'eb\'e5\'e2\'ee\'e3\'ee \'f3\'f0\'ee\'e2\'ed\'ff\par
+\par
+\par
+\par
+\'c4\'e5\'ec\'ee\'ed\'f1\'f2\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'fb\'e5 \'e7\'ed\'e0\'f7\'e5\'ed\'e8\'ff \'e4\'eb\'ff \'ec\'e0\'ea\'e5\'f2\'e0 dashboard.\'c0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\'e0 \'ef\'ee \'ea\'e0\'e6\'e4\'ee\'e9 \'e5\'e4\'e8\'ed\'e8\'f6\'e5 \'f2\'e5\'f5\'ed\'e8\'ea\'e8\par
+KPI\tab\'d7\'f2\'ee \'ef\'ee\'ea\'e0\'e7\'fb\'e2\'e0\'e5\'f2\par
+Revenue\tab\'c2\'fb\'f0\'f3\'f7\'ea\'e0\par
+Direct Cost\tab\'cf\'f0\'ff\'ec\'fb\'e5 \'f0\'e0\'f1\'f5\'ee\'e4\'fb\par
+Operating Profit\tab\'ce\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'e0\'ff \'ef\'f0\'e8\'e1\'fb\'eb\'fc\par
+Revenue / Hour\tab\'c4\'ee\'f5\'ee\'e4\'ed\'ee\'f1\'f2\'fc \'f7\'e0\'f1\'e0\par
+Cost / Hour\tab\'d1\'e5\'e1\'e5\'f1\'f2\'ee\'e8\'ec\'ee\'f1\'f2\'fc \'f7\'e0\'f1\'e0\par
+Utilization\tab\'ca\'ee\'fd\'f4\'f4\'e8\'f6\'e8\'e5\'ed\'f2 \'e7\'e0\'e3\'f0\'f3\'e7\'ea\'e8\par
+Downtime\tab\'cf\'f0\'ee\'f1\'f2\'ee\'e9\par
+Maintenance Cost\tab\'d0\'e5\'ec\'ee\'ed\'f2\'ed\'fb\'e5 \'f0\'e0\'f1\'f5\'ee\'e4\'fb\par
+Fuel Efficiency\tab\'d0\'e0\'f1\'f5\'ee\'e4 \'f2\'ee\'ef\'eb\'e8\'e2\'e0\par
+Payback\tab\'ce\'ea\'f3\'ef\'e0\'e5\'ec\'ee\'f1\'f2\'fc \'ef\'f0\'e8\'ee\'e1\'f0\'e5\'f2\'e5\'ed\'e8\'ff\par
+\par
+\'c0\'ed\'e0\'eb\'e8\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e5 \'ee\'f2\'f7\'b8\'f2\'fb\par
+- \'d0\'e5\'e9\'f2\'e8\'ed\'e3 \'f2\'e5\'f5\'ed\'e8\'ea\'e8 \'ef\'ee \'ef\'f0\'e8\'e1\'fb\'eb\'e8.\par
+- \'d0\'e5\'e9\'f2\'e8\'ed\'e3 \'f2\'e5\'f5\'ed\'e8\'ea\'e8 \'ef\'ee \'e7\'e0\'e3\'f0\'f3\'e7\'ea\'e5.\par
+- \'d0\'e5\'e9\'f2\'e8\'ed\'e3 \'ea\'eb\'e8\'e5\'ed\'f2\'ee\'e2 \'ef\'ee \'e4\'ee\'f5\'ee\'e4\'ed\'ee\'f1\'f2\'e8.\par
+- \'d0\'e5\'e9\'f2\'e8\'ed\'e3 \'ee\'e1\'fa\'e5\'ea\'f2\'ee\'e2 \'ef\'ee \'ef\'f0\'e8\'e1\'fb\'eb\'fc\'ed\'ee\'f1\'f2\'e8.\par
+- \'c4\'e8\'ed\'e0\'ec\'e8\'ea\'e0 \'f0\'e0\'f1\'f5\'ee\'e4\'ee\'e2 \'ed\'e0 \'f0\'e5\'ec\'ee\'ed\'f2.\par
+- \'c0\'ed\'e0\'eb\'e8\'e7 \'e4\'e5\'e1\'e8\'f2\'ee\'f0\'f1\'ea\'ee\'e9 \'e7\'e0\'e4\'ee\'eb\'e6\'e5\'ed\'ed\'ee\'f1\'f2\'e8.\par
+- \'c0\'ed\'e0\'eb\'e8\'e7 \'e7\'e0\'f0\'ef\'eb\'e0\'f2\'fb \'e8 \'ec\'ee\'f2\'ee\'f7\'e0\'f1\'ee\'e2.\par
+- \'c0\'ed\'e0\'eb\'e8\'e7 \'e7\'e0\'e3\'f0\'f3\'e7\'ea\'e8 \'ec\'e0\'f8\'e8\'ed\'e8\'f1\'f2\'ee\'e2.\par
+- \'cf\'f0\'ee\'e3\'ed\'ee\'e7 \'e2\'fb\'f0\'f3\'f7\'ea\'e8.\par
+- \'cf\'f0\'ee\'e3\'ed\'ee\'e7 \'ef\'ee\'f2\'f0\'e5\'e1\'ed\'ee\'f1\'f2\'e8 \'e2 \'f0\'e5\'ec\'ee\'ed\'f2\'e5.\par
+- \'c0\'ed\'e0\'eb\'e8\'e7 \'ef\'ee\'ea\'f3\'ef\'ea\'e8 \'e8\'eb\'e8 \'ef\'f0\'ee\'e4\'e0\'e6\'e8 \'f2\'e5\'f5\'ed\'e8\'ea\'e8.\par
+\par
+8. \'ca\'e0\'ea \'e1\'f3\'e4\'e5\'f2 \'f0\'e0\'e1\'ee\'f2\'e0\'f2\'fc AI-\'e0\'ed\'e0\'eb\'e8\'f2\'e8\'ea \'f0\'f3\'ea\'ee\'e2\'ee\'e4\'e8\'f2\'e5\'eb\'ff\par
+\'c2 \'e8\'ed\'f2\'e5\'f0\'f4\'e5\'e9\'f1\'e5 \'ef\'ee\'ff\'e2\'eb\'ff\'e5\'f2\'f1\'ff \'ee\'f2\'e4\'e5\'eb\'fc\'ed\'fb\'e9 \'f0\'e0\'e7\'e4\'e5\'eb:\par
+\par
+AI Business Analyst\par
+\par
+\'d0\'f3\'ea\'ee\'e2\'ee\'e4\'e8\'f2\'e5\'eb\'fc \'e7\'e0\'e4\'e0\'b8\'f2 \'e2\'ee\'ef\'f0\'ee\'f1\'fb \'ee\'e1\'fb\'f7\'ed\'fb\'ec \'ff\'e7\'fb\'ea\'ee\'ec.\par
+\par
+\'cf\'f0\'e8\'ec\'e5\'f0\'fb:\par
+- \'ca\'e0\'ea\'e0\'ff \'f2\'e5\'f5\'ed\'e8\'ea\'e0 \'ef\'f0\'e8\'ed\'e5\'f1\'eb\'e0 \'ec\'e0\'ea\'f1\'e8\'ec\'e0\'eb\'fc\'ed\'f3\'fe \'ef\'f0\'e8\'e1\'fb\'eb\'fc \'e7\'e0 \'ea\'e2\'e0\'f0\'f2\'e0\'eb?\par
+- \'ca\'e0\'ea\'e8\'e5 \'ec\'e0\'f8\'e8\'ed\'fb \'ef\'f0\'ee\'f1\'f2\'e0\'e8\'e2\'e0\'eb\'e8 \'e1\'ee\'eb\'e5\'e5 20% \'e2\'f0\'e5\'ec\'e5\'ed\'e8?\par
+- \'d1\'ea\'ee\'eb\'fc\'ea\'ee \'ec\'fb \'e7\'e0\'f0\'e0\'e1\'ee\'f2\'e0\'eb\'e8 \'ed\'e0 \'e0\'f0\'e5\'ed\'e4\'e5 \'ea\'f0\'e0\'ed\'ee\'e2?\par
+- \'ca\'e0\'ea\'ee\'e9 \'ea\'eb\'e8\'e5\'ed\'f2 \'ef\'f0\'e8\'ed\'ee\'f1\'e8\'f2 \'ec\'e0\'ea\'f1\'e8\'ec\'e0\'eb\'fc\'ed\'f3\'fe \'ec\'e0\'f0\'e6\'f3?\par
+- \'ca\'e0\'ea\'e8\'e5 \'ec\'e0\'f8\'e8\'ed\'fb \'e2\'fb\'e3\'ee\'e4\'ed\'e5\'e5 \'ef\'f0\'ee\'e4\'e0\'f2\'fc?\par
+- \'c3\'e4\'e5 \'ed\'e0\'e1\'eb\'fe\'e4\'e0\'e5\'f2\'f1\'ff \'f0\'ee\'f1\'f2 \'f0\'e5\'ec\'ee\'ed\'f2\'ed\'fb\'f5 \'f0\'e0\'f1\'f5\'ee\'e4\'ee\'e2?\par
+- \'ca\'e0\'ea\'e8\'e5 \'e7\'e0\'ff\'e2\'ea\'e8 \'ed\'e5 \'ee\'e1\'f0\'e0\'e1\'ee\'f2\'e0\'ed\'fb?\par
+- \'ca\'e0\'ea\'e8\'e5 \'e0\'ea\'f2\'fb \'ed\'e5 \'ef\'ee\'e4\'ef\'e8\'f1\'e0\'ed\'fb?\par
+- \'ca\'e0\'ea\'e8\'e5 \'ec\'e0\'f8\'e8\'ed\'fb \'e8\'ec\'e5\'fe\'f2 \'ee\'f2\'f0\'e8\'f6\'e0\'f2\'e5\'eb\'fc\'ed\'f3\'fe \'e4\'ee\'f5\'ee\'e4\'ed\'ee\'f1\'f2\'fc?\par
+- \'d1\'f0\'e0\'e2\'ed\'e8 \'ef\'f0\'e8\'e1\'fb\'eb\'fc\'ed\'ee\'f1\'f2\'fc \'fd\'ea\'f1\'ea\'e0\'e2\'e0\'f2\'ee\'f0\'ee\'e2 \'e8 \'f1\'e0\'ec\'ee\'f1\'e2\'e0\'eb\'ee\'e2.\par
+- \'cf\'ee\'f7\'e5\'ec\'f3 \'f0\'e0\'f1\'f5\'ee\'e4\'fb \'ed\'e0 \'f2\'ee\'ef\'eb\'e8\'e2\'ee \'e2\'fb\'f0\'ee\'f1\'eb\'e8?\par
+- \'d1\'ee\'f1\'f2\'e0\'e2\'fc \'ee\'f2\'f7\'b8\'f2 \'ef\'ee \'ea\'ee\'ec\'ef\'e0\'ed\'e8\'e8 \'e7\'e0 \'ec\'e5\'f1\'ff\'f6.\par
+\'cf\'f0\'e8\'ec\'e5\'f0 \'e0\'f0\'f5\'e8\'f2\'e5\'ea\'f2\'f3\'f0\'fb \'e2\'fb\'ef\'ee\'eb\'ed\'e5\'ed\'e8\'ff \'e2\'ee\'ef\'f0\'ee\'f1\'e0\par
+\par
+\f2\lang1033 Python\f0\lang1049\par
+async def analyze_equipment_profit(question: str):\par
+\par
+    # 1. \'ce\'ef\'f0\'e5\'e4\'e5\'eb\'ff\'e5\'ec \'e7\'e0\'e4\'e0\'f7\'f3\par
+    intent = await orchestrator.classify(question)\par
+\par
+    # 2. \'cf\'ee\'eb\'f3\'f7\'e0\'e5\'ec \'f1\'f2\'f0\'f3\'ea\'f2\'f3\'f0\'e8\'f0\'ee\'e2\'e0\'ed\'ed\'fb\'e5 \'e4\'e0\'ed\'ed\'fb\'e5\par
+    financial_data = await finance_service.get_kpi()\par
+\par
+    # 3. \'cf\'ee\'eb\'f3\'f7\'e0\'e5\'ec \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'fb\'e5 \'e4\'e0\'ed\'ed\'fb\'e5\par
+    operations_data = await operations_service.get_kpi()\par
+\par
+    # 4. \'cf\'ee\'eb\'f3\'f7\'e0\'e5\'ec \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'fb \'f7\'e5\'f0\'e5\'e7 RAG\par
+    context = await rag_service.search(question)\par
+\par
+    # 5. \'cf\'e5\'f0\'e5\'e4\'e0\'b8\'ec \'ef\'f0\'ee\'e2\'e5\'f0\'e5\'ed\'ed\'fb\'e5 \'e4\'e0\'ed\'ed\'fb\'e5 \'e2 LLM\par
+    result = await llm_service.analyze(\par
+        question=question,\par
+        financial_data=financial_data,\par
+        operations_data=operations_data,\par
+        context=context\par
+    )\par
+\par
+    return result\par
+\par
+\'c2 production-\'e2\'e5\'f0\'f1\'e8\'e8 SQL \'e4\'ee\'eb\'e6\'e5\'ed \'f4\'ee\'f0\'ec\'e8\'f0\'ee\'e2\'e0\'f2\'fc\'f1\'ff \'f2\'ee\'eb\'fc\'ea\'ee \'f7\'e5\'f0\'e5\'e7 \'f0\'e0\'e7\'f0\'e5\'f8\'b8\'ed\'ed\'fb\'e5 \'e8\'ed\'f1\'f2\'f0\'f3\'ec\'e5\'ed\'f2\'fb, \'ea\'ee\'ed\'f2\'f0\'ee\'eb\'e8\'f0\'f3\'e5\'ec\'fb\'e5 \'e7\'e0\'ef\'f0\'ee\'f1\'fb \'e8 \'ee\'e3\'f0\'e0\'ed\'e8\'f7\'e5\'ed\'ed\'f3\'fe \'f1\'f5\'e5\'ec\'f3 \'e4\'ee\'f1\'f2\'f3\'ef\'e0. \'cd\'e5 \'f1\'eb\'e5\'e4\'f3\'e5\'f2 \'e4\'e0\'e2\'e0\'f2\'fc LLM \'ef\'f0\'ee\'e8\'e7\'e2\'ee\'eb\'fc\'ed\'fb\'e9 \'e4\'ee\'f1\'f2\'f3\'ef \'ea \'e1\'e0\'e7\'e5.\par
+\par
+9. \'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'e7\'e0\'f6\'e8\'ff \'f0\'e0\'e1\'ee\'f7\'e8\'f5 \'ef\'f0\'ee\'f6\'e5\'f1\'f1\'ee\'e2\par
+\'cd\'e0\'e8\'e1\'ee\'eb\'e5\'e5 \'ef\'ee\'eb\'e5\'e7\'ed\'fb\'e9 \'fd\'f4\'f4\'e5\'ea\'f2 \'e4\'e0\'f1\'f2 \'ed\'e5 \'ef\'f0\'ee\'f1\'f2\'ee AI-\'f7\'e0\'f2, \'e0 \'e0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'e7\'e0\'f6\'e8\'ff \'f0\'e5\'e3\'f3\'eb\'ff\'f0\'ed\'fb\'f5 \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'e9.\par
+\'cf\'f0\'ee\'f6\'e5\'f1\'f1\tab\'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'e7\'e0\'f6\'e8\'ff\par
+\'ce\'f2\'f7\'b8\'f2\'fb \'ec\'e0\'f8\'e8\'ed\'e8\'f1\'f2\'ee\'e2\tab\'d1\'e1\'ee\'f0 \'f7\'e5\'f0\'e5\'e7 Telegram / \'ec\'ee\'e1\'e8\'eb\'fc\'ed\'fb\'e9 \'e8\'ed\'f2\'e5\'f0\'f4\'e5\'e9\'f1\par
+\'d2\'e0\'e1\'e5\'eb\'e8\tab\'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'ee\'e5 \'f4\'ee\'f0\'ec\'e8\'f0\'ee\'e2\'e0\'ed\'e8\'e5\par
+\'c7\'e0\'f0\'ef\'eb\'e0\'f2\'e0\tab\'d0\'e0\'f1\'f7\'b8\'f2 \'ef\'ee \'f3\'f2\'e2\'e5\'f0\'e6\'e4\'b8\'ed\'ed\'fb\'ec \'ef\'f0\'e0\'e2\'e8\'eb\'e0\'ec\par
+\'cf\'f0\'ee\'e2\'e5\'f0\'ea\'e0 \'ee\'f2\'f7\'b8\'f2\'ee\'e2\tab\'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'ee\'f8\'e8\'e1\'ee\'ea \'e8 \'e0\'ed\'ee\'ec\'e0\'eb\'e8\'e9\par
+\'c7\'e0\'ff\'e2\'ea\'e8\tab\'d0\'e5\'e3\'e8\'f1\'f2\'f0\'e0\'f6\'e8\'ff \'e8 \'ec\'e0\'f0\'f8\'f0\'f3\'f2\'e8\'e7\'e0\'f6\'e8\'ff\par
+\'c4\'ee\'e3\'ee\'e2\'ee\'f0\'fb\tab\'c3\'e5\'ed\'e5\'f0\'e0\'f6\'e8\'ff \'ef\'ee \'f8\'e0\'e1\'eb\'ee\'ed\'e0\'ec\par
+\'c0\'ea\'f2\'fb\tab\'d4\'ee\'f0\'ec\'e8\'f0\'ee\'e2\'e0\'ed\'e8\'e5 \'ef\'ee \'ef\'ee\'e4\'f2\'e2\'e5\'f0\'e6\'e4\'b8\'ed\'ed\'fb\'ec \'f1\'ec\'e5\'ed\'e0\'ec\par
+\'d1\'f7\'e5\'f2\'e0\tab\'cf\'ee\'e4\'e3\'ee\'f2\'ee\'e2\'ea\'e0 \'ea \'e2\'fb\'f1\'f2\'e0\'e2\'eb\'e5\'ed\'e8\'fe\par
+\'c4\'e5\'e1\'e8\'f2\'ee\'f0\'ea\'e0\tab\'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'f1\'f0\'ee\'ea\'ee\'e2 \'ee\'ef\'eb\'e0\'f2\'fb\par
+\'d2\'ce \'f2\'e5\'f5\'ed\'e8\'ea\'e8\tab\'cf\'eb\'e0\'ed\'e8\'f0\'ee\'e2\'e0\'ed\'e8\'e5 \'ef\'ee \'ec\'ee\'f2\'ee\'f7\'e0\'f1\'e0\'ec\par
+\'d0\'e5\'ec\'ee\'ed\'f2\'fb\tab\'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'f0\'e0\'f1\'f5\'ee\'e4\'ee\'e2\par
+\'ce\'f2\'f7\'b8\'f2\'fb\tab\'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e0\'ff \'e3\'e5\'ed\'e5\'f0\'e0\'f6\'e8\'ff\par
+\'d3\'ef\'f0\'e0\'e2\'eb\'e5\'ed\'f7\'e5\'f1\'ea\'e8\'e5 \'e7\'e0\'e4\'e0\'f7\'e8\tab\'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'f1\'f0\'ee\'ea\'ee\'e2 \'e8 \'ee\'f2\'e2\'e5\'f2\'f1\'f2\'e2\'e5\'ed\'ed\'fb\'f5\par
+\par
+\'cf\'f0\'e8\'ec\'e5\'f0 \'e5\'e6\'e5\'e4\'ed\'e5\'e2\'ed\'ee\'e3\'ee AI-\'f6\'e8\'ea\'eb\'e0\par
+\par
+06:00  \'cf\'f0\'ee\'e2\'e5\'f0\'ea\'e0 \'e7\'e0\'ef\'eb\'e0\'ed\'e8\'f0\'ee\'e2\'e0\'ed\'ed\'fb\'f5 \'f1\'ec\'e5\'ed\par
+08:00  \'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'ef\'ee\'f1\'f2\'f3\'ef\'eb\'e5\'ed\'e8\'ff \'ee\'f2\'f7\'b8\'f2\'ee\'e2\par
+12:00  \'cf\'f0\'ee\'e2\'e5\'f0\'ea\'e0 \'e0\'ed\'ee\'ec\'e0\'eb\'e8\'e9 \'e8 \'ee\'f8\'e8\'e1\'ee\'ea\par
+16:00  \'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'ed\'e5\'e7\'e0\'ea\'f0\'fb\'f2\'fb\'f5 \'e7\'e0\'ff\'e2\'ee\'ea\par
+18:00  \'d4\'ee\'f0\'ec\'e8\'f0\'ee\'e2\'e0\'ed\'e8\'e5 \'e5\'e6\'e5\'e4\'ed\'e5\'e2\'ed\'ee\'e3\'ee \'ee\'f2\'f7\'b8\'f2\'e0\par
+18:05  \'ce\'f2\'ef\'f0\'e0\'e2\'ea\'e0 \'f0\'f3\'ea\'ee\'e2\'ee\'e4\'e8\'f2\'e5\'eb\'fe\par
+       \f3\u9500?\u9472?\u9472?\f2\lang1033  \f0\lang1049\'c2\'fb\'f0\'f3\'f7\'ea\'e0\par
+       \f3\u9500?\u9472?\u9472?\f2\lang1033  \f0\lang1049\'cf\'f0\'e8\'e1\'fb\'eb\'fc\par
+       \f3\u9500?\u9472?\u9472?\f2\lang1033  \f0\lang1049\'d0\'e0\'e1\'ee\'f2\'e0 \'f2\'e5\'f5\'ed\'e8\'ea\'e8\par
+       \f3\u9500?\u9472?\u9472?\f2\lang1033  \f0\lang1049\'cf\'f0\'ee\'f1\'f2\'ee\'e8\par
+       \f3\u9500?\u9472?\u9472?\f2\lang1033  \f0\lang1049\'d0\'e0\'f1\'f5\'ee\'e4\'fb\par
+       \f3\u9500?\u9472?\u9472?\f2\lang1033  \f0\lang1049\'c4\'e5\'e1\'e8\'f2\'ee\'f0\'ea\'e0\par
+       \f3\u9492?\u9472?\u9472?\f2\lang1033  \f0\lang1049\'cf\'f0\'ee\'e1\'eb\'e5\'ec\'ed\'fb\'e5 \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'e8\par
+\par
+\'c2\'f0\'e5\'ec\'ff \'ef\'f0\'e8\'e2\'e5\'e4\'e5\'ed\'ee \'ea\'e0\'ea \'ef\'f0\'e8\'ec\'e5\'f0 \'f0\'e0\'f1\'ef\'e8\'f1\'e0\'ed\'e8\'ff.\par
+\par
+10. \'d1\'f0\'e0\'e2\'ed\'e5\'ed\'e8\'e5: AI ERP \'ef\'f0\'ee\'f2\'e8\'e2 Excel, Google Sheets \'e8 \'f1\'ee\'f2\'f0\'f3\'e4\'ed\'e8\'ea\'e0\par
+\'d2\'e5\'ef\'e5\'f0\'fc \'f1\'e0\'ec\'ee\'e5 \'e2\'e0\'e6\'ed\'ee\'e5 \f1\emdash  \f0\'ee\'f6\'e5\'ed\'ea\'e0 \'fd\'f4\'f4\'e5\'ea\'f2\'e8\'e2\'ed\'ee\'f1\'f2\'e8.\par
+\par
+\'df \'f0\'e0\'e7\'e4\'e5\'eb\'fe \'f1\'f0\'e0\'e2\'ed\'e5\'ed\'e8\'e5 \'ed\'e0 \'f2\'f0\'e8 \'f1\'e8\'f1\'f2\'e5\'ec\'fb:\par
+1. Excel / Google Sheets.\par
+2. \'c6\'e8\'e2\'ee\'e9 \'f1\'ee\'f2\'f0\'f3\'e4\'ed\'e8\'ea \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'ee\'e3\'ee \'f3\'f7\'b8\'f2\'e0.\par
+3. \'d0\'e0\'e7\'f0\'e0\'e1\'ee\'f2\'e0\'ed\'ed\'e0\'ff ERP + CRM + BI + AI.\par
+\'d1\'f0\'e0\'e2\'ed\'e8\'f2\'e5\'eb\'fc\'ed\'e0\'ff \'f2\'e0\'e1\'eb\'e8\'f6\'e0\par
+\'ca\'f0\'e8\'f2\'e5\'f0\'e8\'e9\tab Excel / Sheets\tab\'d1\'ee\'f2\'f0\'f3\'e4\'ed\'e8\'ea\tab ERP + AI\par
+\'d3\'f7\'b8\'f2 \'f2\'e5\'f5\'ed\'e8\'ea\'e8\tab\'d0\'f3\'f7\'ed\'ee\'e9\tab\'d0\'f3\'f7\'ed\'ee\'e9 / \'ef\'ee\'eb\'f3\'e0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e9\tab\'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'e7\'e8\'f0\'ee\'e2\'e0\'ed\'ed\'fb\'e9\par
+\'d3\'f7\'b8\'f2 \'f1\'ec\'e5\'ed\tab\'c2\'e2\'ee\'e4 \'e2\'f0\'f3\'f7\'ed\'f3\'fe\tab\'ce\'e1\'f0\'e0\'e1\'ee\'f2\'ea\'e0 \'ee\'f2\'f7\'b8\'f2\'ee\'e2\tab\'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e9 \'f1\'e1\'ee\'f0 \'e8 \'ea\'ee\'ed\'f2\'f0\'ee\'eb\'fc\par
+\'d0\'e0\'f1\'f7\'b8\'f2 \'e7\'e0\'f0\'ef\'eb\'e0\'f2\'fb\tab\'d4\'ee\'f0\'ec\'f3\'eb\'fb\tab\'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'e8 \'f0\'e0\'f1\'f7\'b8\'f2\tab\'d0\'e0\'f1\'f7\'b8\'f2 \'ef\'ee \'ef\'f0\'e0\'e2\'e8\'eb\'e0\'ec\par
+\'d0\'e0\'f1\'f7\'b8\'f2 \'ef\'f0\'e8\'e1\'fb\'eb\'e8\tab\'d2\'e0\'e1\'eb\'e8\'f6\'fb\tab\'c0\'ed\'e0\'eb\'e8\'e7\tab\'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e9\par
+\'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'ee\'f8\'e8\'e1\'ee\'ea\tab\'d4\'ee\'f0\'ec\'f3\'eb\'fb / \'f0\'f3\'f7\'ed\'ee\'e9\tab\'cf\'f0\'ee\'e2\'e5\'f0\'ea\'e0\tab\'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e5 \'ef\'f0\'ee\'e2\'e5\'f0\'ea\'e8\par
+\'c0\'ed\'e0\'eb\'e8\'e7 \'e4\'ee\'f5\'ee\'e4\'ed\'ee\'f1\'f2\'e8\tab\'ce\'e3\'f0\'e0\'ed\'e8\'f7\'e5\'ed\'ed\'fb\'e9\tab\'c0\'ed\'e0\'eb\'e8\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e9\tab KPI + AI\par
+\'c0\'ed\'e0\'eb\'e8\'e7 \'e1\'ee\'eb\'fc\'f8\'e8\'f5 \'ee\'e1\'fa\'b8\'ec\'ee\'e2\tab\'d1\'eb\'ee\'e6\'ed\'e5\'e5\tab\'cc\'e5\'e4\'eb\'e5\'ed\'ed\'ee\tab\'c1\'fb\'f1\'f2\'f0\'ee\par
+\'cf\'f0\'ee\'e3\'ed\'ee\'e7\'e8\'f0\'ee\'e2\'e0\'ed\'e8\'e5\tab\'d0\'f3\'f7\'ed\'ee\'e5\tab\'dd\'ea\'f1\'ef\'e5\'f0\'f2\'ed\'ee\'e5\tab\'cc\'ee\'e4\'e5\'eb\'e8 + AI\par
+\'cf\'ee\'e8\'f1\'ea \'ef\'f0\'e8\'f7\'e8\'ed \'ef\'f0\'ee\'e1\'eb\'e5\'ec\tab\'d0\'f3\'f7\'ed\'ee\'e9\tab\'dd\'ea\'f1\'ef\'e5\'f0\'f2\'ed\'fb\'e9\tab SQL + AI\par
+\'ce\'e1\'f0\'e0\'e1\'ee\'f2\'ea\'e0 \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'ee\'e2\tab\'d0\'f3\'f7\'ed\'e0\'ff\tab\'d0\'f3\'f7\'ed\'e0\'ff\tab OCR + RAG\par
+\'d0\'e0\'e1\'ee\'f2\'e0 24/7\tab\'cd\'e5\'f2\tab\'cd\'e5\'f2\tab\'c4\'e0\par
+\'cc\'e0\'f1\'f8\'f2\'e0\'e1\'e8\'f0\'ee\'e2\'e0\'ed\'e8\'e5\tab\'ce\'e3\'f0\'e0\'ed\'e8\'f7\'e5\'ed\'ed\'ee\'e5\tab\'cd\'e0\'e9\'ec\tab\'c0\'f0\'f5\'e8\'f2\'e5\'ea\'f2\'f3\'f0\'ed\'ee\'e5\par
+\'d3\'ef\'f0\'e0\'e2\'eb\'e5\'ed\'f7\'e5\'f1\'ea\'e8\'e5 \'ee\'f2\'f7\'b8\'f2\'fb\tab\'d0\'f3\'f7\'ed\'fb\'e5\tab\'cf\'ee\'e4\'e3\'ee\'f2\'ee\'e2\'ea\'e0\tab\'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e5\par
+\'c7\'e0\'e2\'e8\'f1\'e8\'ec\'ee\'f1\'f2\'fc \'ee\'f2 \'f1\'ee\'f2\'f0\'f3\'e4\'ed\'e8\'ea\'e0\tab\'c2\'fb\'f1\'ee\'ea\'e0\'ff\tab\'c2\'fb\'f1\'ee\'ea\'e0\'ff\tab\'cd\'e8\'e6\'e5\par
+\'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'ef\'f0\'ee\'f6\'e5\'f1\'f1\'ee\'e2\tab\'d7\'e0\'f1\'f2\'e8\'f7\'ed\'fb\'e9\tab\'d0\'f3\'f7\'ed\'ee\'e9\tab\'d1\'e8\'f1\'f2\'e5\'ec\'ed\'fb\'e9\par
+\'c5\'e4\'e8\'ed\'e0\'ff \'e1\'e0\'e7\'e0 \'e4\'e0\'ed\'ed\'fb\'f5\tab\'cd\'e5 \'e2\'f1\'e5\'e3\'e4\'e0\tab\'cd\'e5 \'e2\'f1\'e5\'e3\'e4\'e0\tab\'c4\'e0\par
+\'c8\'f1\'f2\'ee\'f0\'e8\'ff \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'e9\tab\'d0\'e0\'e7\'f0\'ee\'e7\'ed\'e5\'ed\'ed\'e0\'ff\tab\'c7\'e0\'e2\'e8\'f1\'e8\'f2 \'ee\'f2 \'f3\'f7\'b8\'f2\'e0\tab\'d6\'e5\'ed\'f2\'f0\'e0\'eb\'e8\'e7\'ee\'e2\'e0\'ed\'ed\'e0\'ff\par
+\par
+\'cd\'ee \'e5\'f1\'f2\'fc \'ef\'f0\'e8\'ed\'f6\'e8\'ef\'e8\'e0\'eb\'fc\'ed\'fb\'e9 \'ed\'fe\'e0\'ed\'f1: AI \'ed\'e5 \'e7\'e0\'ec\'e5\'ed\'ff\'e5\'f2 \'ee\'ef\'fb\'f2\'ed\'ee\'e3\'ee \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'ee\'e3\'ee \'ec\'e5\'ed\'e5\'e4\'e6\'e5\'f0\'e0, \'ea\'ee\'f2\'ee\'f0\'fb\'e9 \'ef\'ee\'ed\'e8\'ec\'e0\'e5\'f2 \'f0\'e5\'e0\'eb\'fc\'ed\'f3\'fe \'f1\'e8\'f2\'f3\'e0\'f6\'e8\'fe \'ed\'e0 \'f1\'f2\'f0\'ee\'e8\'f2\'e5\'eb\'fc\'ed\'fb\'f5 \'ee\'e1\'fa\'e5\'ea\'f2\'e0\'f5, \'f3\'ec\'e5\'e5\'f2 \'e4\'ee\'e3\'ee\'e2\'e0\'f0\'e8\'e2\'e0\'f2\'fc\'f1\'ff \'f1 \'ea\'eb\'e8\'e5\'ed\'f2\'e0\'ec\'e8, \'f3\'ef\'f0\'e0\'e2\'eb\'ff\'e5\'f2 \'ea\'ee\'ed\'f4\'eb\'e8\'ea\'f2\'e0\'ec\'e8 \'e8 \'ef\'f0\'e8\'ed\'e8\'ec\'e0\'e5\'f2 \'ee\'f2\'e2\'e5\'f2\'f1\'f2\'e2\'e5\'ed\'ed\'ee\'f1\'f2\'fc.\par
+\par
+\'cb\'f3\'f7\'f8\'e8\'e9 \'f0\'e5\'e7\'f3\'eb\'fc\'f2\'e0\'f2 \f1\emdash  \f0\'f1\'e8\'f1\'f2\'e5\'ec\'e0, \'e2 \'ea\'ee\'f2\'ee\'f0\'ee\'e9 \'f1\'ee\'f2\'f0\'f3\'e4\'ed\'e8\'ea \'f3\'ef\'f0\'e0\'e2\'eb\'ff\'e5\'f2 \'ef\'f0\'ee\'f6\'e5\'f1\'f1\'e0\'ec\'e8, \'e0 AI \'e2\'fb\'ef\'ee\'eb\'ed\'ff\'e5\'f2 \'e1\'ee\'eb\'fc\'f8\'f3\'fe \'f7\'e0\'f1\'f2\'fc \'f0\'f3\'f2\'e8\'ed\'ed\'ee\'e9 \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'f7\'e5\'f1\'ea\'ee\'e9 \'f0\'e0\'e1\'ee\'f2\'fb.\par
+\par
+11. \'ca\'ee\'eb\'e8\'f7\'e5\'f1\'f2\'e2\'e5\'ed\'ed\'e0\'ff \'ee\'f6\'e5\'ed\'ea\'e0 \'fd\'f4\'f4\'e5\'ea\'f2\'e8\'e2\'ed\'ee\'f1\'f2\'e8\par
+\'cd\'e8\'e6\'e5 \f1\emdash  \f0\'ef\'f0\'e5\'e4\'e2\'e0\'f0\'e8\'f2\'e5\'eb\'fc\'ed\'e0\'ff \'e8\'ed\'e6\'e5\'ed\'e5\'f0\'ed\'ee-\'fd\'ea\'ee\'ed\'ee\'ec\'e8\'f7\'e5\'f1\'ea\'e0\'ff \'ee\'f6\'e5\'ed\'ea\'e0 \'e4\'eb\'ff \'ea\'ee\'ec\'ef\'e0\'ed\'e8\'e8 \'f1 \'ef\'e0\'f0\'ea\'ee\'ec 30\f1\endash 100 \f0\'e5\'e4\'e8\'ed\'e8\'f6 \'f2\'e5\'f5\'ed\'e8\'ea\'e8.\par
+\par
+\'dd\'f2\'ee \'ed\'e5 \'f1\'f2\'e0\'f2\'e8\'f1\'f2\'e8\'ea\'e0 \'ee\'f2\'f0\'e0\'f1\'eb\'e8 \'e8 \'ed\'e5 \'e3\'e0\'f0\'e0\'ed\'f2\'e8\'f0\'ee\'e2\'e0\'ed\'ed\'fb\'e9 \'f0\'e5\'e7\'f3\'eb\'fc\'f2\'e0\'f2 \'e2\'ed\'e5\'e4\'f0\'e5\'ed\'e8\'ff. \'dd\'f2\'ee \'f1\'f6\'e5\'ed\'e0\'f0\'ed\'e0\'ff \'ec\'ee\'e4\'e5\'eb\'fc, \'ea\'ee\'f2\'ee\'f0\'f3\'fe \'ed\'e5\'ee\'e1\'f5\'ee\'e4\'e8\'ec\'ee \'ef\'f0\'ee\'e2\'e5\'f0\'e8\'f2\'fc \'ed\'e0 \'f4\'e0\'ea\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'f5 \'e4\'e0\'ed\'ed\'fb\'f5 \'ea\'ee\'ec\'ef\'e0\'ed\'e8\'e8.\par
+\'cf\'ee\'ea\'e0\'e7\'e0\'f2\'e5\'eb\'fc\tab Excel + \'f1\'ee\'f2\'f0\'f3\'e4\'ed\'e8\'ea\tab ERP + AI\par
+\'cf\'ee\'e4\'e3\'ee\'f2\'ee\'e2\'ea\'e0 \'e5\'e6\'e5\'e4\'ed\'e5\'e2\'ed\'ee\'e3\'ee \'ee\'f2\'f7\'b8\'f2\'e0\tab 1\f1\endash 3 \f0\'f7\'e0\'f1\'e0\tab 5\f1\endash 15 \f0\'ec\'e8\'ed\'f3\'f2\par
+\'cc\'e5\'f1\'ff\'f7\'ed\'fb\'e9 \'ee\'f2\'f7\'b8\'f2\tab 1\f1\endash 3 \f0\'f0\'e0\'e1\'ee\'f7\'e8\'f5 \'e4\'ed\'ff\tab 10\f1\endash 60 \f0\'ec\'e8\'ed\'f3\'f2\par
+\'d1\'e2\'e5\'f0\'ea\'e0 \'f2\'e0\'e1\'e5\'eb\'e5\'e9\tab 2\f1\endash 8 \f0\'f7\'e0\'f1\'ee\'e2\tab 15\f1\endash 60 \f0\'ec\'e8\'ed\'f3\'f2\par
+\'cf\'f0\'ee\'e2\'e5\'f0\'ea\'e0 \'f0\'e0\'f1\'f5\'ee\'e4\'ee\'e2\tab\'d0\'f3\'f7\'ed\'e0\'ff\tab\'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e5 \'ef\'f0\'e0\'e2\'e8\'eb\'e0\par
+\'cf\'ee\'e8\'f1\'ea \'ef\'f0\'ee\'e1\'eb\'e5\'ec\'ed\'ee\'e9 \'f2\'e5\'f5\'ed\'e8\'ea\'e8\tab\'d0\'f3\'f7\'ed\'ee\'e9 \'e0\'ed\'e0\'eb\'e8\'e7\tab\'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e9 \'f0\'e5\'e9\'f2\'e8\'ed\'e3\par
+\'c0\'ed\'e0\'eb\'e8\'e7 \'ef\'f0\'e8\'e1\'fb\'eb\'fc\'ed\'ee\'f1\'f2\'e8\tab\'cf\'e5\'f0\'e8\'ee\'e4\'e8\'f7\'e5\'f1\'ea\'e8\'e9\tab\'cf\'ee\'f1\'f2\'ee\'ff\'ed\'ed\'fb\'e9\par
+\'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'ed\'e5\'e7\'e0\'ea\'f0\'fb\'f2\'fb\'f5 \'e7\'e0\'ff\'e2\'ee\'ea\tab\'d0\'f3\'f7\'ed\'ee\'e9\tab\'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e9\par
+\'c4\'ee\'f1\'f2\'f3\'ef\'ed\'ee\'f1\'f2\'fc \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\'e8\tab\'c2 \'f0\'e0\'e1\'ee\'f7\'e5\'e5 \'e2\'f0\'e5\'ec\'ff\tab 24/7\par
+\'d1\'ea\'ee\'f0\'ee\'f1\'f2\'fc \'f0\'e5\'e0\'ea\'f6\'e8\'e8 \'ed\'e0 \'ee\'f2\'ea\'eb\'ee\'ed\'e5\'ed\'e8\'ff\tab\'d7\'e0\'f1\'fb / \'e4\'ed\'e8\tab\'cc\'e8\'ed\'f3\'f2\'fb / \'f7\'e0\'f1\'fb\par
+\par
+\'cf\'ee\'f2\'e5\'ed\'f6\'e8\'e0\'eb\'fc\'ed\'fb\'e9 \'fd\'f4\'f4\'e5\'ea\'f2 \'e0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'e7\'e0\'f6\'e8\'e8\par
+\'d6\'e5\'eb\'e5\'e2\'ee\'e9 \'f1\'f6\'e5\'ed\'e0\'f0\'e8\'e9\par
+60\f1\endash 85%\par
+\f0\'d1\'ed\'e8\'e6\'e5\'ed\'e8\'e5 \'f2\'f0\'f3\'e4\'ee\'e7\'e0\'f2\'f0\'e0\'f2 \'ed\'e0 \'f0\'f3\'f2\'e8\'ed\'ed\'fb\'e9 \'f1\'e1\'ee\'f0, \'ee\'e1\'f0\'e0\'e1\'ee\'f2\'ea\'f3 \'e8 \'ef\'ee\'e4\'e3\'ee\'f2\'ee\'e2\'ea\'f3 \'ee\'f2\'f7\'b8\'f2\'ed\'ee\'f1\'f2\'e8\par
+\par
+\par
+\'d6\'e5\'eb\'e5\'e2\'ee\'e9 \'f1\'f6\'e5\'ed\'e0\'f0\'e8\'e9\par
+30\f1\endash 60%\par
+\f0\'d1\'ed\'e8\'e6\'e5\'ed\'e8\'e5 \'e2\'f0\'e5\'ec\'e5\'ed\'e8 \'ed\'e0 \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'f3\'fe \'f1\'e2\'e5\'f0\'ea\'f3 \'e8 \'ef\'f0\'ee\'e2\'e5\'f0\'ea\'f3 \'e4\'e0\'ed\'ed\'fb\'f5\par
+\par
+\par
+\par
+\'dd\'f2\'ee \'f6\'e5\'eb\'e5\'e2\'fb\'e5 \'e4\'e8\'e0\'ef\'e0\'e7\'ee\'ed\'fb \'e4\'eb\'ff \'f5\'ee\'f0\'ee\'f8\'ee \'e0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'e7\'e8\'f0\'ee\'e2\'e0\'ed\'ed\'fb\'f5 \'ef\'f0\'ee\'f6\'e5\'f1\'f1\'ee\'e2, \'e0 \'ed\'e5 \'ee\'e1\'e5\'f9\'e0\'ed\'e8\'e5 \'f1\'ee\'ea\'f0\'e0\'f2\'e8\'f2\'fc \'e2\'e5\'f1\'fc \'f8\'f2\'e0\'f2 \'ed\'e0 \'f2\'e0\'ea\'ee\'e9 \'ef\'f0\'ee\'f6\'e5\'ed\'f2.\par
+\'c3\'e4\'e5 \'e2\'ee\'e7\'ed\'e8\'ea\'e0\'e5\'f2 \'f0\'e5\'e0\'eb\'fc\'ed\'e0\'ff \'fd\'ea\'ee\'ed\'ee\'ec\'e8\'ff\par
+1. \'d1\'ee\'f2\'f0\'f3\'e4\'ed\'e8\'ea \'ed\'e5 \'ef\'e5\'f0\'e5\'ef\'e8\'f1\'fb\'e2\'e0\'e5\'f2 \'ee\'f2\'f7\'b8\'f2\'fb \'e8\'e7 \'f2\'e0\'e1\'eb\'e8\'f6.\par
+2. \'cd\'e5 \'f1\'e2\'ee\'e4\'e8\'f2 \'e2\'f0\'f3\'f7\'ed\'f3\'fe \'e4\'e0\'ed\'ed\'fb\'e5 \'ef\'ee \'ea\'e0\'e6\'e4\'ee\'e9 \'ec\'e0\'f8\'e8\'ed\'e5.\par
+3. \'cd\'e5 \'ef\'e5\'f0\'e5\'f1\'f7\'e8\'f2\'fb\'e2\'e0\'e5\'f2 \'f7\'e0\'f1\'fb \'e8 \'f1\'ec\'e5\'ed\'fb.\par
+4. \'cd\'e5 \'e8\'f9\'e5\'f2 \'f1\'e0\'ec\'ee\'f1\'f2\'ee\'ff\'f2\'e5\'eb\'fc\'ed\'ee \'ee\'f8\'e8\'e1\'ea\'e8 \'e2 \'f1\'ee\'f2\'ed\'ff\'f5 \'f1\'f2\'f0\'ee\'ea.\par
+5. \'cd\'e5 \'f1\'ee\'e1\'e8\'f0\'e0\'e5\'f2 \'ea\'e0\'e6\'e4\'fb\'e9 \'e4\'e5\'ed\'fc \'ee\'e4\'e8\'ed \'e8 \'f2\'ee\'f2 \'e6\'e5 \'ee\'f2\'f7\'b8\'f2.\par
+6. \'cd\'e5 \'f4\'ee\'f0\'ec\'e8\'f0\'f3\'e5\'f2 \'e2\'f0\'f3\'f7\'ed\'f3\'fe \'f0\'e5\'e9\'f2\'e8\'ed\'e3 \'e4\'ee\'f5\'ee\'e4\'ed\'ee\'f1\'f2\'e8 \'f2\'e5\'f5\'ed\'e8\'ea\'e8.\par
+7. \'cd\'e5 \'f2\'f0\'e0\'f2\'e8\'f2 \'f7\'e0\'f1\'fb \'ed\'e0 \'ef\'ee\'e8\'f1\'ea \'e8\'ed\'f4\'ee\'f0\'ec\'e0\'f6\'e8\'e8 \'e2 \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'e0\'f5.\par
+8. \'d0\'f3\'ea\'ee\'e2\'ee\'e4\'e8\'f2\'e5\'eb\'fc \'ef\'ee\'eb\'f3\'f7\'e0\'e5\'f2 \'e3\'ee\'f2\'ee\'e2\'f3\'fe \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\'f3 \'e1\'e5\'e7 \'ee\'e6\'e8\'e4\'e0\'ed\'e8\'ff \'f1\'ee\'f2\'f0\'f3\'e4\'ed\'e8\'ea\'e0.\par
+\par
+12. \'dd\'ea\'ee\'ed\'ee\'ec\'e8\'f7\'e5\'f1\'ea\'e0\'ff \'fd\'f4\'f4\'e5\'ea\'f2\'e8\'e2\'ed\'ee\'f1\'f2\'fc \'e2\'ed\'e5\'e4\'f0\'e5\'ed\'e8\'ff\par
+\'d0\'e0\'f1\'f1\'ec\'ee\'f2\'f0\'e8\'ec \'f3\'f1\'eb\'ee\'e2\'ed\'fb\'e9 \'ef\'f0\'e8\'ec\'e5\'f0 \'ea\'ee\'ec\'ef\'e0\'ed\'e8\'e8 \'f1 50 \'e5\'e4\'e8\'ed\'e8\'f6\'e0\'ec\'e8 \'f2\'e5\'f5\'ed\'e8\'ea\'e8.\par
+\par
+\'c8\'eb\'eb\'fe\'f1\'f2\'f0\'e0\'f2\'e8\'e2\'ed\'e0\'ff \'f4\'e8\'ed\'e0\'ed\'f1\'ee\'e2\'e0\'ff \'ec\'ee\'e4\'e5\'eb\'fc \f1\emdash  \f0\'e7\'ed\'e0\'f7\'e5\'ed\'e8\'ff \'ed\'e5\'ee\'e1\'f5\'ee\'e4\'e8\'ec\'ee \'e7\'e0\'ec\'e5\'ed\'e8\'f2\'fc \'f4\'e0\'ea\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'ec\'e8.\par
+\'cf\'ee\'ea\'e0\'e7\'e0\'f2\'e5\'eb\'fc\tab\'c7\'ed\'e0\'f7\'e5\'ed\'e8\'e5\par
+\'ca\'ee\'eb\'e8\'f7\'e5\'f1\'f2\'e2\'ee \'f2\'e5\'f5\'ed\'e8\'ea\'e8\tab 50\par
+\'d1\'f0\'e5\'e4\'ed\'ff\'ff \'ec\'e5\'f1\'ff\'f7\'ed\'e0\'ff \'e2\'fb\'f0\'f3\'f7\'ea\'e0 \'ed\'e0 \'ec\'e0\'f8\'e8\'ed\'f3\tab 500 000 \f2\u8381?\par
+\f0\'ce\'e1\'f9\'e0\'ff \'ec\'e5\'f1\'ff\'f7\'ed\'e0\'ff \'e2\'fb\'f0\'f3\'f7\'ea\'e0\tab 25 000 000 \f2\u8381?\par
+\f0\'ce\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'e0\'ff \'ec\'e0\'f0\'e6\'e0\tab 20%\par
+\'ce\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'e0\'ff \'ef\'f0\'e8\'e1\'fb\'eb\'fc\tab 5 000 000 \f2\u8381?\par
+\par
+\f0\'cf\'f0\'e5\'e4\'ef\'ee\'eb\'ee\'e6\'e8\'ec, \'e2\'ed\'e5\'e4\'f0\'e5\'ed\'e8\'e5 \'f1\'e8\'f1\'f2\'e5\'ec\'fb \'ef\'ee\'e7\'e2\'ee\'eb\'ff\'e5\'f2:\par
+- \'d3\'e2\'e5\'eb\'e8\'f7\'e8\'f2\'fc \'ee\'ef\'eb\'e0\'f7\'e8\'e2\'e0\'e5\'ec\'f3\'fe \'e7\'e0\'e3\'f0\'f3\'e7\'ea\'f3 \'ed\'e0 3 \'ef\'f0\'ee\'f6\'e5\'ed\'f2\'ed\'fb\'f5 \'ef\'f3\'ed\'ea\'f2\'e0.\par
+- \'d1\'ed\'e8\'e7\'e8\'f2\'fc \'ef\'ee\'f2\'e5\'f0\'e8 \'ee\'f2 \'ef\'f0\'ee\'f1\'f2\'ee\'e5\'e2 \'e8 \'ed\'e5\'f1\'ee\'e3\'eb\'e0\'f1\'ee\'e2\'e0\'ed\'ed\'fb\'f5 \'f1\'ec\'e5\'ed.\par
+- \'d1\'ee\'ea\'f0\'e0\'f2\'e8\'f2\'fc \'e0\'e4\'ec\'e8\'ed\'e8\'f1\'f2\'f0\'e0\'f2\'e8\'e2\'ed\'fb\'e5 \'f2\'f0\'f3\'e4\'ee\'e7\'e0\'f2\'f0\'e0\'f2\'fb.\par
+- \'d1\'ed\'e8\'e7\'e8\'f2\'fc \'ea\'ee\'eb\'e8\'f7\'e5\'f1\'f2\'e2\'ee \'ee\'f8\'e8\'e1\'ee\'ea \'e2 \'f0\'e0\'f1\'f7\'b8\'f2\'e0\'f5.\par
+- \'d3\'f1\'ea\'ee\'f0\'e8\'f2\'fc \'e2\'fb\'f1\'f2\'e0\'e2\'eb\'e5\'ed\'e8\'e5 \'f1\'f7\'e5\'f2\'ee\'e2 \'e8 \'ea\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'e4\'e5\'e1\'e8\'f2\'ee\'f0\'ea\'e8.\par
+\'c5\'f1\'eb\'e8 \'f3\'e2\'e5\'eb\'e8\'f7\'e5\'ed\'e8\'e5 \'e7\'e0\'e3\'f0\'f3\'e7\'ea\'e8 \'ed\'e0 3 \'ef.\'ef. \'e4\'e0\'f1\'f2 \'e4\'ee\'ef\'ee\'eb\'ed\'e8\'f2\'e5\'eb\'fc\'ed\'fb\'e5 3% \'e2\'fb\'f0\'f3\'f7\'ea\'e8, \'f2\'ee:\par
+\\[\par
+25\\,000\\,000 \\times 3\\% = 750\\,000\\ \f2\u8381?\par
+\\]\par
+\par
+\f0\'cf\'f0\'e8 \'ec\'e0\'f0\'e6\'e8\'ed\'e0\'eb\'fc\'ed\'ee\'f1\'f2\'e8 \'e4\'ee\'ef\'ee\'eb\'ed\'e8\'f2\'e5\'eb\'fc\'ed\'fb\'f5 \'f3\'f1\'eb\'f3\'e3 50% \'fd\'f2\'ee \'e4\'e0\'f1\'f2 \'ee\'ea\'ee\'eb\'ee 375 000 \f2\u8381? \f0\'e4\'ee\'ef\'ee\'eb\'ed\'e8\'f2\'e5\'eb\'fc\'ed\'ee\'e3\'ee \'f0\'e5\'e7\'f3\'eb\'fc\'f2\'e0\'f2\'e0 \'e2 \'ec\'e5\'f1\'ff\'f6.\par
+\par
+\'c4\'ee\'ef\'ee\'eb\'ed\'e8\'f2\'e5\'eb\'fc\'ed\'ee \'ec\'ee\'e6\'ed\'ee \'ef\'ee\'eb\'f3\'f7\'e8\'f2\'fc \'fd\'ea\'ee\'ed\'ee\'ec\'e8\'fe \'ed\'e0 \'e0\'e4\'ec\'e8\'ed\'e8\'f1\'f2\'f0\'e0\'f2\'e8\'e2\'ed\'fb\'f5 \'ef\'f0\'ee\'f6\'e5\'f1\'f1\'e0\'f5, \'ed\'ee \'e5\'b8 \'ed\'e5\'ee\'e1\'f5\'ee\'e4\'e8\'ec\'ee \'f0\'e0\'f1\'f1\'f7\'e8\'f2\'fb\'e2\'e0\'f2\'fc \'ee\'f2\'e4\'e5\'eb\'fc\'ed\'ee, \'f7\'f2\'ee\'e1\'fb \'ed\'e5 \'f3\'f7\'e8\'f2\'fb\'e2\'e0\'f2\'fc \'ee\'e4\'ed\'e8 \'e8 \'f2\'e5 \'e6\'e5 \'fd\'f4\'f4\'e5\'ea\'f2\'fb \'e4\'e2\'e0\'e6\'e4\'fb.\par
+\'ce\'f6\'e5\'ed\'ea\'e0 \'ee\'ea\'f3\'ef\'e0\'e5\'ec\'ee\'f1\'f2\'e8\par
+\'d1\'f6\'e5\'ed\'e0\'f0\'e8\'e9\tab\'c2\'ed\'e5\'e4\'f0\'e5\'ed\'e8\'e5\tab\'c4\'ee\'ef\'ee\'eb\'ed\'e8\'f2\'e5\'eb\'fc\'ed\'fb\'e9 \'fd\'f4\'f4\'e5\'ea\'f2 / \'ec\'e5\'f1\'ff\'f6\tab\'ce\'ea\'f3\'ef\'e0\'e5\'ec\'ee\'f1\'f2\'fc\par
+MVP\tab 1,5 \'ec\'eb\'ed \f2\u8381?\tab 150 \f0\'f2\'fb\'f1. \f2\u8381?\tab 10 \f0\'ec\'e5\'f1.\par
+\'d1\'f0\'e5\'e4\'ed\'e8\'e9\tab 3 \'ec\'eb\'ed \f2\u8381?\tab 350 \f0\'f2\'fb\'f1. \f2\u8381?\tab 8,6 \f0\'ec\'e5\'f1.\par
+\'d0\'e0\'f1\'f8\'e8\'f0\'e5\'ed\'ed\'fb\'e9\tab 6 \'ec\'eb\'ed \f2\u8381?\tab 700 \f0\'f2\'fb\'f1. \f2\u8381?\tab 8,6 \f0\'ec\'e5\'f1.\par
+\par
+\'dd\'f2\'ee \'ef\'f0\'e8\'ec\'e5\'f0\'fb \'f0\'e0\'f1\'f7\'b8\'f2\'e0, \'e0 \'ed\'e5 \'f0\'fb\'ed\'ee\'f7\'ed\'fb\'e5 \'ea\'ee\'f2\'e8\'f0\'ee\'e2\'ea\'e8 \'f0\'e0\'e7\'f0\'e0\'e1\'ee\'f2\'ea\'e8. \'d0\'e5\'e0\'eb\'fc\'ed\'e0\'ff \'f1\'f2\'ee\'e8\'ec\'ee\'f1\'f2\'fc \'e7\'e0\'e2\'e8\'f1\'e8\'f2 \'ee\'f2 \'e8\'ed\'f2\'e5\'e3\'f0\'e0\'f6\'e8\'e9, \'ea\'ee\'eb\'e8\'f7\'e5\'f1\'f2\'e2\'e0 \'ef\'ee\'eb\'fc\'e7\'ee\'e2\'e0\'f2\'e5\'eb\'e5\'e9, \'f2\'e5\'f5\'ed\'e8\'ea\'e8, \'e0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'e7\'e0\'f6\'e8\'e8 \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'ee\'ee\'e1\'ee\'f0\'ee\'f2\'e0 \'e8 \'f2\'f0\'e5\'e1\'ee\'e2\'e0\'ed\'e8\'e9 \'ea AI.\par
+\par
+13. \'ca\'e0\'ea \'ff \'f0\'e5\'ea\'ee\'ec\'e5\'ed\'e4\'f3\'fe \'f0\'e5\'e0\'eb\'e8\'e7\'ee\'e2\'e0\'f2\'fc \'ef\'f0\'ee\'e5\'ea\'f2\par
+\'cd\'e5 \'f1\'eb\'e5\'e4\'f3\'e5\'f2 \'f1\'f0\'e0\'e7\'f3 \'f0\'e0\'e7\'f0\'e0\'e1\'e0\'f2\'fb\'e2\'e0\'f2\'fc \'e2\'f1\'e5 AI-\'e0\'e3\'e5\'ed\'f2\'fb, CRM, ERP, RAG \'e8 \'ef\'f0\'ee\'e3\'ed\'ee\'e7\'e8\'f0\'ee\'e2\'e0\'ed\'e8\'e5 \'ee\'e4\'ed\'ee\'e2\'f0\'e5\'ec\'e5\'ed\'ed\'ee.\par
+\par
+\'ce\'ef\'f2\'e8\'ec\'e0\'eb\'fc\'ed\'e0\'ff \'ef\'ee\'f1\'eb\'e5\'e4\'ee\'e2\'e0\'f2\'e5\'eb\'fc\'ed\'ee\'f1\'f2\'fc:\par
+\'dd\'f2\'e0\'ef 1\par
+ERP Core + PostgreSQL\par
+\par
+- \'d2\'e5\'f5\'ed\'e8\'ea\'e0\par
+- \'ca\'eb\'e8\'e5\'ed\'f2\'fb\par
+- \'c0\'f0\'e5\'ed\'e4\'e0\par
+- \'d1\'ec\'e5\'ed\'fb\par
+- \'d2\'e0\'e1\'e5\'eb\'e8\par
+- \'c4\'ee\'f5\'ee\'e4\'fb \'e8 \'f0\'e0\'f1\'f5\'ee\'e4\'fb\par
+- \'c1\'e0\'e7\'ee\'e2\'fb\'e9 dashboard\par
+  \par
+  \'dd\'f2\'e0\'ef 2\par
+  CRM + \'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'e7\'e0\'f6\'e8\'ff\par
+- \'c7\'e0\'ff\'e2\'ea\'e8\par
+- \'c4\'ee\'e3\'ee\'e2\'ee\'f0\'fb\par
+- Telegram\par
+- \'c4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'fb\par
+- \'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e9 \'f1\'e1\'ee\'f0 \'ee\'f2\'f7\'b8\'f2\'ee\'e2\par
+- \'d0\'e0\'f1\'f7\'b8\'f2 \'e7\'e0\'f0\'ef\'eb\'e0\'f2\'fb\par
+  \par
+  \'dd\'f2\'e0\'ef 3\par
+  AI Analytics\par
+- AI-\'e0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\par
+- SQL-\'e8\'ed\'f1\'f2\'f0\'f3\'ec\'e5\'ed\'f2\'fb\par
+- \'ca\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'ee\'f8\'e8\'e1\'ee\'ea\par
+- \'c0\'ed\'e0\'eb\'e8\'e7 \'ef\'f0\'e8\'e1\'fb\'eb\'fc\'ed\'ee\'f1\'f2\'e8\par
+- Executive Agent\par
+  \par
+  \'dd\'f2\'e0\'ef 4\par
+  RAG + FAISS\par
+- \'ca\'ee\'f0\'ef\'ee\'f0\'e0\'f2\'e8\'e2\'ed\'e0\'ff \'e1\'e0\'e7\'e0 \'e7\'ed\'e0\'ed\'e8\'e9\par
+- \'c0\'ed\'e0\'eb\'e8\'e7 \'e4\'ee\'e3\'ee\'e2\'ee\'f0\'ee\'e2\par
+- \'cf\'ee\'e8\'f1\'ea \'ef\'ee \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'e0\'ec\par
+- AI-\'ef\'ee\'ec\'ee\'f9\'ed\'e8\'ea \'f1\'ee\'f2\'f0\'f3\'e4\'ed\'e8\'ea\'ee\'e2\par
+  \par
+  \'dd\'f2\'e0\'ef 5\par
+  Predictive Analytics\par
+- \'cf\'f0\'ee\'e3\'ed\'ee\'e7 \'e7\'e0\'e3\'f0\'f3\'e7\'ea\'e8\par
+- \'cf\'f0\'ee\'e3\'ed\'ee\'e7 \'f0\'e5\'ec\'ee\'ed\'f2\'ee\'e2\par
+- \'cf\'f0\'ee\'e3\'ed\'ee\'e7 \'e2\'fb\'f0\'f3\'f7\'ea\'e8\par
+- \'ce\'ef\'f2\'e8\'ec\'e8\'e7\'e0\'f6\'e8\'ff \'ef\'e0\'f0\'ea\'e0\par
+- \'c0\'ed\'e0\'eb\'e8\'e7 \'ef\'ee\'ea\'f3\'ef\'ea\'e8 / \'ef\'f0\'ee\'e4\'e0\'e6\'e8 \'f2\'e5\'f5\'ed\'e8\'ea\'e8\par
+\par
+14. \'c8\'f2\'ee\'e3\'ee\'e2\'e0\'ff \'f0\'e5\'ea\'ee\'ec\'e5\'ed\'e4\'e0\'f6\'e8\'ff\par
+\'df \'e1\'fb \'f1\'ee\'e7\'e4\'e0\'e2\'e0\'eb SpecialTech AI ERP \f1\emdash  \f0\'f1\'ef\'e5\'f6\'e8\'e0\'eb\'e8\'e7\'e8\'f0\'ee\'e2\'e0\'ed\'ed\'f3\'fe \'ef\'eb\'e0\'f2\'f4\'ee\'f0\'ec\'f3 \'e4\'eb\'ff \'f1\'f2\'f0\'ee\'e8\'f2\'e5\'eb\'fc\'ed\'ee\'e9 \'f2\'e5\'f5\'ed\'e8\'ea\'e8 \'f1\'ee \'f1\'eb\'e5\'e4\'f3\'fe\'f9\'e8\'ec\'e8 \'ef\'f0\'e8\'ed\'f6\'e8\'ef\'e8\'e0\'eb\'fc\'ed\'fb\'ec\'e8 \'ee\'f1\'ee\'e1\'e5\'ed\'ed\'ee\'f1\'f2\'ff\'ec\'e8:\par
+- PostgreSQL \'ea\'e0\'ea \'e5\'e4\'e8\'ed\'fb\'e9 \'e8\'f1\'f2\'ee\'f7\'ed\'e8\'ea \'e4\'ee\'f1\'f2\'ee\'e2\'e5\'f0\'ed\'fb\'f5 \'e4\'e0\'ed\'ed\'fb\'f5.\par
+- FastAPI \'ea\'e0\'ea \'ff\'e4\'f0\'ee \'e1\'e8\'e7\'ed\'e5\'f1-\'eb\'ee\'e3\'e8\'ea\'e8.\par
+- React \'ea\'e0\'ea \'ef\'ee\'eb\'ed\'ee\'f6\'e5\'ed\'ed\'fb\'e9 \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'fb\'e9 \'e8\'ed\'f2\'e5\'f0\'f4\'e5\'e9\'f1.\par
+- ERP \'e4\'eb\'ff \'f3\'f7\'b8\'f2\'e0 \'f2\'e5\'f5\'ed\'e8\'ea\'e8, \'e0\'f0\'e5\'ed\'e4\'fb, \'f1\'ec\'e5\'ed, \'e7\'e0\'f2\'f0\'e0\'f2 \'e8 \'ef\'f0\'e8\'e1\'fb\'eb\'e8.\par
+- CRM \'e4\'eb\'ff \'ea\'eb\'e8\'e5\'ed\'f2\'ee\'e2, \'e7\'e0\'ff\'e2\'ee\'ea \'e8 \'e4\'ee\'e3\'ee\'e2\'ee\'f0\'ee\'e2.\par
+- BI \'e4\'eb\'ff \'e0\'ed\'e0\'eb\'e8\'e7\'e0 \'fd\'f4\'f4\'e5\'ea\'f2\'e8\'e2\'ed\'ee\'f1\'f2\'e8.\par
+- AI-\'e0\'e3\'e5\'ed\'f2\'fb \'e4\'eb\'ff \'ef\'f0\'ee\'e2\'e5\'f0\'ea\'e8, \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\'e8 \'e8 \'e0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'e7\'e0\'f6\'e8\'e8.\par
+- RAG + FAISS \'e4\'eb\'ff \'ea\'ee\'f0\'ef\'ee\'f0\'e0\'f2\'e8\'e2\'ed\'fb\'f5 \'e4\'ee\'ea\'f3\'ec\'e5\'ed\'f2\'ee\'e2.\par
+- Telegram \'e4\'eb\'ff \'e2\'e7\'e0\'e8\'ec\'ee\'e4\'e5\'e9\'f1\'f2\'e2\'e8\'ff \'f1 \'ec\'e0\'f8\'e8\'ed\'e8\'f1\'f2\'e0\'ec\'e8.\par
+- \'c0\'e2\'f2\'ee\'ec\'e0\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e9 \'ea\'ee\'ed\'f2\'f0\'ee\'eb\'fc \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'fb\'f5 \'ef\'f0\'ee\'f6\'e5\'f1\'f1\'ee\'e2.\par
+- AI Business Analyst \'e4\'eb\'ff \'f0\'f3\'ea\'ee\'e2\'ee\'e4\'e8\'f2\'e5\'eb\'ff.\par
+\'cc\'ee\'e9 \'e2\'fb\'e2\'ee\'e4: \'f2\'e0\'ea\'e0\'ff \'f1\'e8\'f1\'f2\'e5\'ec\'e0 \'f1\'ef\'ee\'f1\'ee\'e1\'ed\'e0 \'f1\'f3\'f9\'e5\'f1\'f2\'e2\'e5\'ed\'ed\'ee \'ef\'ee\'e2\'fb\'f1\'e8\'f2\'fc \'ef\'f0\'ee\'e7\'f0\'e0\'f7\'ed\'ee\'f1\'f2\'fc \'e1\'e8\'e7\'ed\'e5\'f1\'e0, \'f1\'ee\'ea\'f0\'e0\'f2\'e8\'f2\'fc \'f0\'f3\'f2\'e8\'ed\'ed\'fb\'e5 \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'e8 \'e8 \'f3\'f1\'ea\'ee\'f0\'e8\'f2\'fc \'ef\'f0\'e8\'ed\'ff\'f2\'e8\'e5 \'f3\'ef\'f0\'e0\'e2\'eb\'e5\'ed\'f7\'e5\'f1\'ea\'e8\'f5 \'f0\'e5\'f8\'e5\'ed\'e8\'e9. \'d1\'e0\'ec\'e0\'ff \'e1\'ee\'eb\'fc\'f8\'e0\'ff \'f6\'e5\'ed\'ed\'ee\'f1\'f2\'fc \'e1\'f3\'e4\'e5\'f2 \'ed\'e5 \'e2 \'fd\'ea\'ee\'ed\'ee\'ec\'e8\'e8 \'ed\'e0 \'ee\'e4\'ed\'ee\'ec \'e1\'f3\'f5\'e3\'e0\'eb\'f2\'e5\'f0\'e5 \'e8\'eb\'e8 \'e0\'ed\'e0\'eb\'e8\'f2\'e8\'ea\'e5, \'e0 \'e2 \'f2\'ee\'ec, \'f7\'f2\'ee \'f0\'f3\'ea\'ee\'e2\'ee\'e4\'e8\'f2\'e5\'eb\'fc \'f1\'ec\'ee\'e6\'e5\'f2 \'e2\'e8\'e4\'e5\'f2\'fc \'f0\'e5\'e0\'eb\'fc\'ed\'f3\'fe \'fd\'ea\'ee\'ed\'ee\'ec\'e8\'ea\'f3 \'ea\'e0\'e6\'e4\'ee\'e9 \'e5\'e4\'e8\'ed\'e8\'f6\'fb \'f2\'e5\'f5\'ed\'e8\'ea\'e8, \'ee\'e1\'fa\'e5\'ea\'f2\'e0, \'ea\'eb\'e8\'e5\'ed\'f2\'e0 \'e8 \'e4\'ee\'e3\'ee\'e2\'ee\'f0\'e0 \'ef\'f0\'e0\'ea\'f2\'e8\'f7\'e5\'f1\'ea\'e8 \'e2 \'f0\'e5\'e0\'eb\'fc\'ed\'ee\'ec \'e2\'f0\'e5\'ec\'e5\'ed\'e8.\par
+\par
+\'c4\'eb\'ff \'f0\'e0\'e7\'f0\'e0\'e1\'ee\'f2\'ea\'e8 \'ff \'e1\'fb \'ed\'e0\'f7\'e0\'eb \'f1 \'ef\'ee\'eb\'ed\'ee\'f6\'e5\'ed\'ed\'ee\'e3\'ee MVP \'ed\'e0 FastAPI + PostgreSQL + React, \'f1\'f0\'e0\'e7\'f3 \'ef\'f0\'e5\'e4\'f3\'f1\'ec\'ee\'f2\'f0\'e5\'e2 \'e0\'f0\'f5\'e8\'f2\'e5\'ea\'f2\'f3\'f0\'f3 AI-\'e0\'e3\'e5\'ed\'f2\'ee\'e2, \'ed\'ee \'ef\'ee\'e4\'ea\'eb\'fe\'f7\'e8\'e2 \'f1\'eb\'ee\'e6\'ed\'fb\'e9 RAG \'e8 \'ef\'f0\'ee\'e3\'ed\'ee\'e7\'e8\'f0\'ee\'e2\'e0\'ed\'e8\'e5 \'ef\'ee\'f1\'eb\'e5 \'ed\'e0\'ea\'ee\'ef\'eb\'e5\'ed\'e8\'ff \'ea\'e0\'f7\'e5\'f1\'f2\'e2\'e5\'ed\'ed\'fb\'f5 \'ee\'ef\'e5\'f0\'e0\'f6\'e8\'ee\'ed\'ed\'fb\'f5 \'e4\'e0\'ed\'ed\'fb\'f5.\par
+\'d1\'eb\'e5\'e4\'f3\'fe\'f9\'e8\'e9 \'ef\'f0\'e0\'ea\'f2\'e8\'f7\'e5\'f1\'ea\'e8\'e9 \'f8\'e0\'e3\par
+\par
+\'cc\'ee\'e6\'ed\'ee \'ef\'e5\'f0\'e5\'e9\'f2\'e8 \'ee\'f2 \'e0\'f0\'f5\'e8\'f2\'e5\'ea\'f2\'f3\'f0\'fb \'ea \'ea\'ee\'ed\'ea\'f0\'e5\'f2\'ed\'ee\'ec\'f3 \'f2\'e5\'f5\'ed\'e8\'f7\'e5\'f1\'ea\'ee\'ec\'f3 \'ef\'f0\'ee\'e5\'ea\'f2\'f3:\par
+- ER-\'e4\'e8\'e0\'e3\'f0\'e0\'ec\'ec\'e0 PostgreSQL \'ed\'e0 30\f1\endash 40 \f0\'f2\'e0\'e1\'eb\'e8\'f6.\par
+- \'cf\'ee\'eb\'ed\'e0\'ff \'f1\'f2\'f0\'f3\'ea\'f2\'f3\'f0\'e0 FastAPI backend.\par
+- \'cc\'ee\'e4\'e5\'eb\'e8 SQLAlchemy \'e8 \'ec\'e8\'e3\'f0\'e0\'f6\'e8\'e8 Alembic.\par
+- React ERP/CRM \'e8\'ed\'f2\'e5\'f0\'f4\'e5\'e9\'f1.\par
+- Docker Compose \'e4\'eb\'ff \'e2\'f1\'e5\'e9 \'f1\'e8\'f1\'f2\'e5\'ec\'fb.\par
+- Multi-Agent AI \'e0\'f0\'f5\'e8\'f2\'e5\'ea\'f2\'f3\'f0\'e0 \'f1 LangGraph.\par
+- RAG + FAISS.\par
+- AI Business Analyst \'f1 SQL-\'e8\'ed\'f1\'f2\'f0\'f3\'ec\'e5\'ed\'f2\'e0\'ec\'e8.\par
+- \'d2\'e5\'f5\'ed\'e8\'f7\'e5\'f1\'ea\'ee\'e5 \'e7\'e0\'e4\'e0\'ed\'e8\'e5 \'ed\'e0 \'f0\'e0\'e7\'f0\'e0\'e1\'ee\'f2\'ea\'f3 \'e8 \'ee\'f6\'e5\'ed\'ea\'e0 \'f1\'f2\'ee\'e8\'ec\'ee\'f1\'f2\'e8.\par
+\par
+
+\pard\sl276\slmult1\par
+Celery + Redis\par
+\par
+\'d4\'ee\'ed\'ee\'e2\'fb\'e5 \'e7\'e0\'e4\'e0\'f7\'e8 \f2\lang1033\'b7 OCR \'b7 \f0\lang1049\'ce\'f2\'f7\'b8\'f2\'fb \f2\lang1033\'b7 AI-\f0\lang1049\'e0\'ed\'e0\'eb\'e8\'e7\f2\lang1033\par
+}
+ 

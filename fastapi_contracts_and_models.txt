@@ -1,0 +1,1967 @@
+================================================================================
+SPECIALTECH AI ERP — КОНТРАКТЫ ЭНДПОИНТОВ И МОДЕЛИ ДАННЫХ FASTAPI
+================================================================================
+Версия API: v1.5 (ревизия 1:1 по Frontend: src/App.tsx, views/*, components/*, utils/*, types/index.ts и server.ts)
+Архитектурный паттерн: Modular Monolith / Clean Architecture
+Стек целевого бэкенда: Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy 2.0+, Alembic, PostgreSQL 15+/17+ (pgvector)
+Текущий runtime-прокси в репозитории: Node.js + Express (server.ts, порт 3000) + Vite SPA
+================================================================================
+
+0. МАППИНГ ТЕКУЩИХ ЭНДПОИНТОВ (server.ts) И ПРАВИЛА ПЕРЕКЛЮЧЕНИЯ FRONTEND -> FASTAPI
+--------------------------------------------------------------------------------
+На текущий момент бизнес-сущности фронтенда хранятся в браузерном localStorage
+(ключи `specialtech_*`, 19 ключей + эфемерный state `adminConfirmationAllowed`),
+а сервер `server.ts` (Express, порт 3000) обслуживает 5 реальных HTTP POST-эндпоинтов:
+
+  Текущий эндпоинт в server.ts      | Целевой эндпоинт FastAPI v1
+  ----------------------------------|-----------------------------------------------
+  POST /api/ai-analyst              | POST /api/v1/ai/query
+  POST /api/chat-agent              | POST /api/v1/chat/agent
+  POST /api/ocr-shift               | POST /api/v1/timesheets/ocr-meter
+  POST /api/1c/test-connection      | POST /api/v1/integrations/1c/test-connection
+  POST /api/telemetry/test-connection | POST /api/v1/telemetry/test-connection
+
+0.1. Мост сериализации camelCase <-> snake_case (КРИТИЧНО для совместимости 1:1 с React)
+--------------------------------------------------------------------------------
+Весь TypeScript-фронтенд (`src/types/index.ts`) использует `camelCase`, а БД PostgreSQL
+(`db/schema.sql`) и Python ORM — `snake_case`. Все Pydantic v2 DTO-схемы ДОЛЖНЫ
+наследоваться от единого базового класса `CamelModel`:
+
+  from pydantic import BaseModel, ConfigDict
+  from pydantic.alias_generators import to_camel
+
+  class CamelModel(BaseModel):
+      model_config = ConfigDict(
+          alias_generator=to_camel,
+          populate_by_name=True,   # принимает и snake_case (внутри Python), и camelCase (от React)
+          from_attributes=True,    # читает напрямую из SQLAlchemy 2.0 ORM моделей
+      )
+
+ВАЖНЫЕ ЯВНЫЕ ПЕРЕОПРЕДЕЛЕНИЯ АЛИАСОВ (акронимы `1C` не совпадают в `to_camel`):
+- `onec_department_code` -> `Field(..., alias="oneCDepartmentCode")`
+- `default_1c_subject`   -> `Field(..., alias="default1CSubject")`
+- `auto_route_to_1c`     -> `Field(..., alias="autoRouteTo1C")`
+- `one_c_config`         -> `Field(..., alias="oneCConfig")`
+При сериализации FastAPI обязан отдавать `response_model_by_alias=True`.
+
+0.2. Переход авторизации и клиентских переключателей ролей на серверный RBAC
+--------------------------------------------------------------------------------
+Сейчас на фронтенде нет формы логина — права переключаются локально:
+- в `ContractsView` (`legalRole`: `admin | top_manager | lawyer | accountant`);
+- в `ChatView` (`senderRole`: `fleet_manager | driver | client | admin`);
+- в `Header` / `FleetManagerView` (`adminConfirmationAllowed`: глобальный флаг).
+При переходе на FastAPI:
+1) `POST /api/v1/auth/login` выдаёт JWT (`sub`, `role: SystemRoleId`, `branch_id`),
+   а переключатели ролей в UI либо отображают `GET /api/v1/auth/me`, либо доступны только под ролью `admin` (impersonation для тестирования).
+2) Политики `meta.role_access_policies` (`pages` и `fields`) проверяются СЕРВЕРНОЙ
+   dependency `require_permission(page, level, field)` — скрытие чувствительных полей
+   (маржа, ФОТ, телефоны MAX, таблицы постоянных/переменных затрат) выполняется на сервере до отдачи JSON.
+
+
+1. СТРУКТУРА ПРОЕКТА FASTAPI
+--------------------------------------------------------------------------------
+app/
+├── main.py                  # Инициализация FastAPI, CORS, middlewares, роутеры v1
+├── core/
+│   ├── config.py            # Настройки Pydantic Settings (DATABASE_URL, GEMINI_API_KEY, GLONASS_API_TOKEN и др.)
+│   ├── security.py          # JWT, хэширование паролей Argon2/Bcrypt, RBAC политики
+│   └── database.py          # AsyncEngine, async_sessionmaker, Base Declarative
+├── models/                  # SQLAlchemy 2.0 ORM модели (соответствуют 12 схемам db/schema.sql v2.1.0)
+│   ├── user.py              # meta.users, meta.role_access_policies
+│   ├── branch.py            # branch.branches, branch_document_flows, branch_fixed_overheads, branch_overhead_details
+│   ├── customer.py          # customer.clients, client_contacts, construction_sites, client_balances_monthly
+│   ├── fleet.py             # fleet.equipment_categories, equipment, equipment_tariffs, telemetry_daily, telemetry_bindings
+│   ├── maintenance.py       # maintenance.service_schedules, maintenance_logs, spare_parts_usage
+│   ├── driver.py            # driver.drivers, driver_equipment_bindings, driver_timesheet_days, driver_cards, card_transactions, payroll_monthly
+│   ├── subrent.py           # subrent.private_contractors, subrent_contracts, subrent_equipment, subrent_shifts, subrent_settlements
+│   ├── crm.py               # crm.deals, deal_shift_logs, deal_stage_history, client_communications, deal_confirmations, max_customer_bot_configs
+│   ├── erp.py               # erp.accounting_subjects, contracts, legal_disputes, legal_history, rental_orders, cost_allocations_monthly, onec_sync_logs, status_notifications
+│   ├── forms.py             # forms.shift_reports, waybills, closing_documents (Акт/КС-2/КС-3/Счёт), work_act_items
+│   ├── audit.py             # audit.anomaly_alerts, fuel_audit_logs
+│   ├── rag.py               # rag.knowledge_documents, document_chunks (pgvector / fallback), retrieval_logs
+│   └── admin.py             # meta.system_admin_config, meta.table_registry
+├── schemas/                 # Pydantic v2 DTO схемы (In, Out, Update, Filter)
+├── api/v1/                  # Контроллеры / роутеры эндпоинтов
+│   ├── auth.py              # /api/v1/auth
+│   ├── branches.py          # /api/v1/branches (участки, потоки, префиксы, постоянные расходы)
+│   ├── fleet.py             # /api/v1/fleet (техника, статусы, массовое обновление себестоимости)
+│   ├── analytics.py         # /api/v1/analytics (рейтинг по периодам, прямые/постоянные, свод по филиалам, каталог заказчиков)
+│   ├── crm.py               # /api/v1/crm (канбан, смены по заявке DealShiftLog, автоархивация 48ч)
+│   ├── rentals.py           # /api/v1/rentals (заказы-наряды, подписание актов)
+│   ├── closing_docs.py      # /api/v1/closing-docs (Акт, КС-2 ОКУД 0322005, КС-3 ОКУД 0322001, Счёт на оплату)
+│   ├── notifications.py     # /api/v1/notifications (статусы документов и оплаты)
+│   ├── drivers.py           # /api/v1/drivers (табель Я/Н/В/Б/О, закрепления и замены)
+│   ├── timesheets.py        # /api/v1/timesheets (рапорты ЭСМ-7, модерация Fleet Manager, OCR)
+│   ├── chat.py              # /api/v1/chat & /api/v1/max-bot (чат участка, LLM-агент /agent и клиент-бот MAX)
+│   ├── legal.py             # /api/v1/legal (реестр договоров, автогенерация из карточки клиента, споры, экспорт, База знаний)
+│   ├── knowledge.py         # /api/v1/knowledge (RAG-база знаний и переиндексация)
+│   ├── integrations_1c.py   # /api/v1/integrations/1c (маршрутизация ООО/ИП, OData/REST)
+│   ├── admin.py             # /api/v1/admin (RBAC, таблицы, LLM, RAG, флаг подтверждения, таблицы затрат)
+│   ├── telemetry.py         # /api/v1/telemetry (ГЛОНАСС/ДУТ/CAN настройки, привязки трекеров, webhook)
+│   ├── ai_analyst.py        # /api/v1/ai (6-агентный AI-аналитик и аудит аномалий)
+│   ├── exchange_excel.py    # /api/v1/exchange/excel (all | fleet | shifts | orders | branches_summary)
+│   └── driver_bot.py        # /api/v1/driver-bot (корпоративные карты и перелив ГСМ)
+└── services/                # Бизнес-логика, расчёты P&L, генерация Акт/КС-2/КС-3/Счёт, AI/RAG
+
+
+================================================================================
+2. БАЗОВЫЕ PYDANTIC V2 СХЕМЫ И ТИПЫ ДАННЫХ (SCHEMAS)
+================================================================================
+
+```python
+from datetime import date, datetime
+from decimal import Decimal
+from enum import Enum
+from typing import Optional, List, Dict, Any, Literal
+from uuid import UUID
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
+from pydantic.alias_generators import to_camel
+
+
+class CamelModel(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+# ------------------------------------------------------------------------------
+# 2.1. Перечисления (Enums)
+# ------------------------------------------------------------------------------
+
+class SystemRoleId(str, Enum):
+    ADMIN = "admin"
+    TOP_MANAGER = "top_manager"
+    FLEET_MANAGER = "fleet_manager"
+    LAWYER = "lawyer"
+    ACCOUNTANT = "accountant"
+    DRIVER = "driver"
+
+
+class LegalRole(str, Enum):
+    ADMIN = "admin"
+    TOP_MANAGER = "top_manager"
+    LAWYER = "lawyer"
+    ACCOUNTANT = "accountant"
+
+
+class PageAccessLevel(str, Enum):
+    EDIT = "edit"
+    VIEW = "view"
+    HIDDEN = "hidden"
+
+
+class EquipmentType(str, Enum):
+    EXCAVATOR = "excavator"
+    CRANE = "crane"
+    DUMP_TRUCK = "dump_truck"
+    LOADER = "loader"
+    BULLDOZER = "bulldozer"
+    CHERRY_PICKER = "cherry_picker"
+
+
+class EquipmentStatus(str, Enum):
+    RENTED = "rented"
+    AVAILABLE = "available"
+    MAINTENANCE = "maintenance"
+    RESERVE = "reserve"
+
+
+class CRMStage(str, Enum):
+    LEAD = "lead"
+    CALCULATION = "calculation"
+    CONTRACT = "contract"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+
+
+class OrderStatus(str, Enum):
+    ACTIVE = "active"
+    SCHEDULED = "scheduled"
+    COMPLETED = "completed"
+    SUSPENDED = "suspended"
+
+
+class ShiftStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    ANOMALY = "anomaly"
+
+
+class PaymentCategory(str, Enum):
+    FUEL_OWN_TANK = "fuel_own_tank"
+    FUEL_FOR_EQUIPMENT = "fuel_for_equipment"
+    PARTS = "parts"
+    OTHER = "other"
+
+
+class ClientType(str, Enum):
+    LEGAL_ENTITY = "legal_entity"
+    INDIVIDUAL = "individual"
+
+
+class AccountingSubjectId(str, Enum):
+    IP_SPECIALTECHNICA = "ip_specialtechnica"  # УСН 6% без НДС
+    OOO_SPECIALTECH = "ooo_specialtech"        # ОСНО с НДС 20%
+
+
+class BranchOverheadCategory(str, Enum):
+    OFFICE_ITR_SALARY = "office_itr_salary"    # Fleet Manager, ИТР, бухгалтерия (без водителей и слесарей ремонта)
+    AHO = "aho"                                # Аренда офиса, бытовки, канцелярия, оргтехника
+    LEASING = "leasing"                        # Лизинг спецтехники и транспорта
+    TAXES = "taxes"                            # Транспортный налог, имущество, налоговые отчисления
+    OTHER = "other"                            # Охрана, медик, ГЛОНАСС/ПО и прочие
+
+
+class ClosingDocKind(str, Enum):
+    ACT_SERVICES = "act_services"              # Акт оказанных услуг / выполненных работ
+    KS2 = "ks2"                                # Унифицированная форма № КС-2 (ОКУД 0322005)
+    KS3 = "ks3"                                # Справка о стоимости выполненных работ и затрат № КС-3 (ОКУД 0322001)
+    INVOICE = "invoice"                        # Счёт на оплату услуг
+
+
+class InvoiceStatus(str, Enum):
+    NOT_ISSUED = "not_issued"
+    ISSUED = "issued"
+    PARTIALLY_PAID = "partially_paid"
+    PAID = "paid"
+    OVERDUE = "overdue"
+
+
+class StatusNotificationCategory(str, Enum):
+    ACT_KS2 = "act_ks2"
+    INVOICE = "invoice"
+    PAYMENT_STATUS = "payment_status"
+    SHIFT_CLOSE = "shift_close"
+
+
+class TimesheetDayCode(str, Enum):
+    WORK_DAY = "Я"
+    NIGHT = "Н"
+    DAY_OFF = "В"
+    SICK = "Б"
+    VACATION = "О"
+
+
+class DriverShiftRoster(str, Enum):
+    SHIFT_1 = "shift_1"
+    SHIFT_2 = "shift_2"
+
+
+class LegalDocKind(str, Enum):
+    CONTRACT = "contract"
+    ADDENDUM = "addendum"
+    DISPUTE = "dispute"
+    CLAIM = "claim"
+    TEMPLATE = "template"
+
+
+class LegalDocStatus(str, Enum):
+    DRAFT = "draft"
+    REVIEW = "review"
+    ACTIVE = "active"
+    DISPUTE = "dispute"
+    RESOLVED = "resolved"
+    ARCHIVED = "archived"
+
+
+class KnowledgeCategory(str, Enum):
+    REGULATIONS = "regulations"
+    CONTRACTS = "contracts"
+    TEMPLATES = "templates"
+    DISPUTES = "disputes"
+    FUEL_NORMS = "fuel_norms"
+    MAINTENANCE = "maintenance"
+    PAYROLL = "payroll"
+
+
+class TableViewId(str, Enum):
+    FLEET = "fleet"
+    RENTALS = "rentals"
+    TIMESHEETS = "timesheets"
+    CONTRACTS = "contracts"
+    CRM = "crm"
+
+
+class TelemetryProvider(str, Enum):
+    WIALON_IPS = "wialon_ips"
+    OMNICOMM = "omnicomm"
+    GALILEOSKY = "galileosky"
+    SCOUT_API = "scout_api"
+    EGTS_RU = "egts_ru"
+
+
+class TelemetryProtocol(str, Enum):
+    WIALON_IPS_V2 = "wialon_ips_v2"
+    EGTS = "egts"
+    REST_JSON = "rest_json"
+    MQTT_TELEMETRY = "mqtt_telemetry"
+
+
+# ------------------------------------------------------------------------------
+# 2.2. Участки (филиалы) и условно-постоянные расходы
+# ------------------------------------------------------------------------------
+
+class BranchDocumentFlowConfig(CamelModel):
+    isolated_streams: bool = True
+    isolate_crm_and_erp: bool = True
+    order_prefix: str = Field(..., example="RO-MSK-2026-")
+    waybill_prefix: str = Field(..., example="ПЛ-MSK-")
+    shift_prefix: str = Field(..., example="SH-")
+    # Базовый префикс закрывающих актов.
+    # Правило деривации в closingDocuments.ts / App.tsx:
+    # - для КС-2: act_prefix (например, "КС2-MSK-")
+    # - для Акта услуг: "АКТ-..." (заменяет ведущий "КС2-" / "КС-2-" на "АКТ-")
+    # - для КС-3: "КС3-{code}-"
+    # - для Счёта: "СЧ-{code}-"
+    act_prefix: str = Field(..., example="КС2-MSK-")
+    onec_department_code: str = Field(..., alias="oneCDepartmentCode", example="00-000001")
+    default_1c_subject: AccountingSubjectId = Field(
+        default=AccountingSubjectId.OOO_SPECIALTECH,
+        alias="default1CSubject",
+    )
+
+
+class BranchOverheadDetailRow(CamelModel):
+    id: str
+    title: str
+    basis: Optional[str] = None
+    amount_rub: Decimal = Field(..., ge=0)
+
+
+class BranchFixedOverheadItem(CamelModel):
+    id: str
+    category: BranchOverheadCategory
+    name: str
+    monthly_amount_rub: Decimal = Field(..., ge=0)
+    note: Optional[str] = None
+    hidden: bool = False
+    details: Optional[List[BranchOverheadDetailRow]] = None
+
+
+class FleetBranchCreate(CamelModel):
+    code: str = Field(..., max_length=16, example="KZN")
+    name: str = Field(..., max_length=200, example="Филиал «Поволжье» (Казань)")
+    city: str = Field(..., max_length=100, example="Казань")
+    is_headquarters: bool = False
+    fleet_manager_name: str
+    fleet_manager_phone: Optional[str] = None
+    chief_mechanic_name: Optional[str] = None
+    chief_mechanic_phone: Optional[str] = None
+    base_address: str
+    regular_clients: List[str] = Field(default_factory=list)
+    document_flow: BranchDocumentFlowConfig
+    fixed_overheads: List[BranchFixedOverheadItem] = Field(default_factory=list)
+
+
+class FleetBranchUpdate(CamelModel):
+    code: Optional[str] = Field(default=None, max_length=16)
+    name: Optional[str] = Field(default=None, max_length=200)
+    city: Optional[str] = Field(default=None, max_length=100)
+    is_headquarters: Optional[bool] = None
+    fleet_manager_name: Optional[str] = None
+    fleet_manager_phone: Optional[str] = None
+    chief_mechanic_name: Optional[str] = None
+    chief_mechanic_phone: Optional[str] = None
+    base_address: Optional[str] = None
+    regular_clients: Optional[List[str]] = None
+    document_flow: Optional[BranchDocumentFlowConfig] = None
+    fixed_overheads: Optional[List[BranchFixedOverheadItem]] = None
+
+
+class FleetBranchResponse(FleetBranchCreate):
+    id: str
+    fixed_overheads_total_rub: Decimal
+
+
+# ------------------------------------------------------------------------------
+# 2.3. Парк спецтехники (Fleet Schemas)
+# ------------------------------------------------------------------------------
+
+class EquipmentBase(CamelModel):
+    branch_id: str = Field(..., example="branch-hq")
+    inventory_number: str = Field(..., max_length=50, example="EXC-14")
+    name: str = Field(..., max_length=255, example="Komatsu PC210NLC-8")
+    equipment_type: EquipmentType = Field(..., alias="type")
+    brand: str = Field(..., max_length=100, example="Komatsu")
+    plate_number: str = Field(..., max_length=50, example="E 384 CB 777")
+    vin: str = Field(..., max_length=32, example="KMTPC210X8849201")
+    year: int = Field(..., ge=1990, le=2035, example=2021)
+    owner: str = Field(..., max_length=255, example="ООО «СпецТехЛизинг»")
+    purchase_price: Decimal = Field(..., ge=0, example=15800000.00)
+    current_value: Decimal = Field(..., ge=0, example=12400000.00)
+    hourly_rate: Decimal = Field(..., ge=0, example=3400.00)
+    fuel_rate_hour: Decimal = Field(..., ge=0, example=17.50)
+    specs: Dict[str, Any] = Field(default_factory=dict, example={"capacity": "22 т", "weight": "22100 кг"})
+    notes: Optional[str] = None
+
+
+class EquipmentCreate(EquipmentBase):
+    status: EquipmentStatus = EquipmentStatus.AVAILABLE
+    assigned_site: Optional[str] = None
+    assigned_operator: Optional[str] = None
+    current_hours: Decimal = Field(default=Decimal("0.0"), ge=0)
+    next_maintenance_in_hours: Decimal = Field(default=Decimal("250.0"), ge=0)
+
+
+class EquipmentUpdate(CamelModel):
+    branch_id: Optional[str] = None
+    name: Optional[str] = None
+    status: Optional[EquipmentStatus] = None
+    assigned_site: Optional[str] = None
+    assigned_operator: Optional[str] = None
+    assigned_operator_id: Optional[str] = None
+    hourly_rate: Optional[Decimal] = None
+    fuel_rate_hour: Optional[Decimal] = None
+    current_hours: Optional[Decimal] = None
+    month_hours: Optional[Decimal] = None
+    mileage_km_month: Optional[Decimal] = None
+    trips_month: Optional[int] = None
+    fuel_cost_month: Optional[Decimal] = None
+    driver_salary_month: Optional[Decimal] = None
+    repair_cost_month: Optional[Decimal] = None
+    transport_cost_month: Optional[Decimal] = None
+    subcontract_cost_month: Optional[Decimal] = None
+    overheads_allocated: Optional[Decimal] = None
+    downtime_hours_month: Optional[Decimal] = None
+    next_maintenance_in_hours: Optional[Decimal] = None
+    notes: Optional[str] = None
+
+
+class EquipmentVariableCostsPatch(CamelModel):
+    equipment_id: str
+    fuel_cost_month: Decimal = Field(..., ge=0)
+    driver_salary_month: Decimal = Field(..., ge=0)
+    repair_cost_month: Decimal = Field(..., ge=0)
+    transport_cost_month: Decimal = Field(..., ge=0)
+    # Опциональные поля — AdminCostTablesSection отправляет только 4 прямые статьи
+    hourly_rate: Optional[Decimal] = Field(default=None, ge=0)
+    fuel_rate_hour: Optional[Decimal] = Field(default=None, ge=0)
+    subcontract_cost_month: Optional[Decimal] = Field(default=None, ge=0)
+    overheads_allocated: Optional[Decimal] = Field(default=None, ge=0)
+
+
+class EquipmentResponse(EquipmentBase):
+    id: str
+    status: EquipmentStatus
+    assigned_site: Optional[str] = None
+    assigned_operator: Optional[str] = None
+    current_hours: Decimal
+    month_hours: Decimal
+    mileage_km_month: Optional[Decimal] = Decimal("0.0")
+    trips_month: Optional[int] = None
+    revenue_month: Decimal
+    fuel_cost_month: Decimal
+    driver_salary_month: Decimal
+    repair_cost_month: Decimal
+    transport_cost_month: Decimal
+    subcontract_cost_month: Decimal = Decimal("0.0")
+    overheads_allocated: Decimal
+    direct_costs_month: Decimal
+    operating_profit_month: Decimal
+    margin_percent: float
+    downtime_hours_month: Decimal
+    next_maintenance_in_hours: Decimal
+    created_at: datetime
+
+
+# ------------------------------------------------------------------------------
+# 2.4. Сменные рапорты (ЭСМ-7) и путевые листы
+# ------------------------------------------------------------------------------
+
+class ShiftReportCreate(CamelModel):
+    branch_id: str
+    equipment_id: str
+    driver_id: Optional[str] = None
+    operator_name: str = Field(..., max_length=150, example="Соколов В. П.")
+    driver_phone: Optional[str] = None
+    card_last4: Optional[str] = Field(default=None, max_length=4, example="4819")
+    client_id: Optional[str] = None
+    client_name: Optional[str] = Field(default=None, max_length=255, example="ООО «Монолит-Строй»")
+    order_id: Optional[str] = None
+    deal_id: Optional[str] = None
+    site_name: str = Field(..., max_length=255, example="ЖК «Северный квартал»")
+    date: date
+    shift_start_time: Optional[str] = None
+    work_start_time: Optional[str] = None
+    work_end_time: Optional[str] = None
+    relocation_hours: Optional[Decimal] = Decimal("0.0")
+    start_hours: Decimal = Field(..., ge=0, example=5406.0)
+    end_hours: Decimal = Field(..., ge=0, example=5420.0)
+    downtime_hours: Decimal = Field(default=Decimal("0.0"), ge=0)
+    downtime_reason: Optional[str] = None
+    mileage_km: Optional[Decimal] = Field(default=None, ge=0)
+    trips_count: Optional[int] = Field(default=None, ge=0)
+    fuel_liters_added: Decimal = Field(..., ge=0, example=280.0)
+    payment_category: Optional[PaymentCategory] = PaymentCategory.FUEL_OWN_TANK
+    payment_target_equipment_id: Optional[str] = None
+    payment_amount_rub: Optional[Decimal] = Field(default=None, ge=0)
+    subcontract_cost_rub: Optional[Decimal] = Field(default=Decimal("0.0"), ge=0)
+    payment_comment: Optional[str] = None
+    chat_note: Optional[str] = None
+    waybill_generated: bool = False
+    waybill_number: Optional[str] = None
+    photo_verified: bool = False
+
+
+class ShiftModerateRequest(CamelModel):
+    operator_name: Optional[str] = None
+    work_hours: Optional[Decimal] = Field(default=None, ge=0, le=24)
+    downtime_hours: Optional[Decimal] = Field(default=None, ge=0, le=24)
+    fuel_liters_added: Optional[Decimal] = Field(default=None, ge=0)
+    calculated_salary: Optional[Decimal] = Field(default=None, ge=0)
+    status: Optional[ShiftStatus] = None
+    anomaly_message: Optional[str] = None
+    chat_note: Optional[str] = None
+
+
+class ShiftReportResponse(CamelModel):
+    id: str
+    branch_id: str
+    shift_number: str
+    date: date
+    equipment_id: str
+    equipment_name: str
+    driver_id: Optional[str] = None
+    operator_name: str
+    driver_phone: Optional[str] = None
+    card_last4: Optional[str] = None
+    client_id: Optional[str] = None
+    client_name: Optional[str] = None
+    order_id: Optional[str] = None
+    deal_id: Optional[str] = None
+    site_name: str
+    shift_start_time: Optional[str] = None
+    work_start_time: Optional[str] = None
+    work_end_time: Optional[str] = None
+    relocation_hours: Optional[Decimal] = None
+    start_hours: Decimal
+    end_hours: Decimal
+    work_hours: Decimal
+    downtime_hours: Decimal
+    downtime_reason: Optional[str] = None
+    mileage_km: Optional[Decimal] = None
+    trips_count: Optional[int] = None
+    fuel_liters_added: Decimal
+    fuel_hourly_calculated: Decimal
+    payment_category: Optional[PaymentCategory] = None
+    payment_target_equipment_id: Optional[str] = None
+    payment_amount_rub: Optional[Decimal] = None
+    subcontract_cost_rub: Optional[Decimal] = None
+    payment_comment: Optional[str] = None
+    chat_note: Optional[str] = None
+    waybill_generated: Optional[bool] = None
+    waybill_number: Optional[str] = None
+    photo_verified: bool
+    status: ShiftStatus
+    anomaly_message: Optional[str] = None
+    calculated_salary: Decimal
+    created_at: datetime
+
+
+# ------------------------------------------------------------------------------
+# 2.5. Водители, табель, закрепления, замены и корпоративные карты
+# ------------------------------------------------------------------------------
+
+class DriverProfileBase(CamelModel):
+    branch_id: str
+    name: str
+    phone: str
+    max_linked: bool = True
+    card_last4: Optional[str] = Field(default=None, max_length=4, example="4819")
+    card_limit_rub: Optional[Decimal] = Field(default=Decimal("150000.00"), ge=0)
+    assigned_equipment_ids: List[str] = Field(default_factory=list)
+    shift_roster: DriverShiftRoster = DriverShiftRoster.SHIFT_1
+    needs_replacement: bool = False
+    replacement_reason: Optional[str] = None
+    timesheet_days: Dict[str, TimesheetDayCode] = Field(default_factory=dict)
+
+
+class DriverProfileCreate(DriverProfileBase):
+    pass
+
+
+class DriverProfileUpdate(CamelModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    max_linked: Optional[bool] = None
+    card_last4: Optional[str] = Field(default=None, max_length=4)
+    card_limit_rub: Optional[Decimal] = Field(default=None, ge=0)
+    assigned_equipment_ids: Optional[List[str]] = None
+    shift_roster: Optional[DriverShiftRoster] = None
+    needs_replacement: Optional[bool] = None
+    replacement_reason: Optional[str] = None
+    timesheet_days: Optional[Dict[str, TimesheetDayCode]] = None
+
+
+class DriverProfileResponse(DriverProfileBase):
+    id: str
+
+
+class DriverReplacementRecord(CamelModel):
+    equipment_id: str
+    driver_id: str
+    driver_name: str
+    driver_phone: str
+    set_by_role: Literal["fleet_manager", "director_admin"]
+    reason: Optional[str] = None
+    updated_at: datetime
+
+
+class DriverCardExpenseCreate(CamelModel):
+    branch_id: str
+    driver_id: str
+    card_last4: str = Field(..., max_length=4, example="4819")
+    source_equipment_id: str
+    shift_report_id: Optional[str] = None
+    client_id: Optional[str] = None
+    client_name: Optional[str] = None
+    order_id: Optional[str] = None
+    deal_id: Optional[str] = None
+    payment_category: PaymentCategory
+    target_equipment_id: Optional[str] = None
+    target_driver_id: Optional[str] = None
+    liters: Optional[Decimal] = Field(default=None, ge=0, example=120.0)
+    amount_rub: Decimal = Field(..., gt=0, example=7800.00)
+    site_name: str = Field(..., max_length=255, example="ЖК «Северный квартал»")
+    receipt_photo_url: Optional[str] = None
+    comment: Optional[str] = None
+
+
+class DriverCardExpenseResponse(DriverCardExpenseCreate):
+    id: str
+    reallocated_to_target: bool
+    source_driver_balance_rub: Decimal
+    target_driver_balance_rub: Optional[Decimal] = None
+    erp_crm_notified: bool
+    created_at: datetime
+
+
+# ------------------------------------------------------------------------------
+# 2.6. CRM, Аренда, Закрывающие документы (Акт, КС-2, КС-3, Счёт) и Уведомления
+# ------------------------------------------------------------------------------
+
+class ChatAttachment(CamelModel):
+    id: str
+    name: str
+    size: int
+    mime_type: str
+    category: Literal["requisites", "site_photo", "other"]
+    preview_url: Optional[str] = None
+
+
+class ChatConfirmation(CamelModel):
+    type: Literal["hours", "shift_close", "volume_trips"]
+    label: str
+    value: str
+    equipment_name: Optional[str] = None
+    shift_number: Optional[str] = None
+    approved_by_admin: bool
+
+
+class ChatMessageCreate(CamelModel):
+    branch_id: str
+    deal_id: Optional[str] = None
+    sender_name: str
+    sender_role: Literal["admin", "fleet_manager", "driver", "client"]
+    text: str
+    attachment: Optional[ChatAttachment] = None
+    confirmation: Optional[ChatConfirmation] = None
+
+
+class ChatMessageResponse(ChatMessageCreate):
+    id: str
+    timestamp: str
+
+
+class DealShiftLog(CamelModel):
+    id: str
+    date: date
+    shift_slot: Literal[1, 2]
+    hours: Decimal = Field(..., ge=1, le=12)
+    closed_at: datetime
+
+
+class CloseDealShiftRequest(CamelModel):
+    date: date
+    shift_slot: Literal[1, 2]
+    hours: Decimal = Field(..., ge=1, le=12)
+
+
+class CRMDealCreate(CamelModel):
+    branch_id: str
+    client_name: str = Field(..., max_length=255, example="ООО «Монолит-Строй»")
+    contact_person: str = Field(..., max_length=150, example="Захаров Роман")
+    phone: str = Field(..., max_length=50, example="+7 (495) 781-44-12")
+    client_type: Optional[ClientType] = ClientType.LEGAL_ENTITY
+    has_contract: Optional[bool] = True
+    accounting_subject: Optional[AccountingSubjectId] = AccountingSubjectId.OOO_SPECIALTECH
+    equipment_type: EquipmentType
+    equipment_assigned_id: Optional[str] = None
+    assigned_driver_id: Optional[str] = None
+    assigned_driver_name: Optional[str] = None
+    assigned_driver_phone: Optional[str] = None
+    driver_assignment_mode: Optional[
+        Literal["default_single", "timesheet_shift", "manager_replacement"]
+    ] = "default_single"
+    hours_requested: int = Field(..., gt=0, example=240)
+    shifts_requested: Optional[int] = Field(default=None, ge=1, example=20)
+    hourly_rate_agreed: Decimal = Field(..., gt=0, example=3400.0)
+    site_address: str = Field(..., example="Москва, Дмитровское ш., 82")
+    manager: str = Field(..., example="Орлов П. С.")
+    attachments: List[ChatAttachment] = Field(default_factory=list)
+
+
+class CRMDealUpdate(CamelModel):
+    client_name: Optional[str] = None
+    contact_person: Optional[str] = None
+    phone: Optional[str] = None
+    client_type: Optional[ClientType] = None
+    has_contract: Optional[bool] = None
+    accounting_subject: Optional[AccountingSubjectId] = None
+    equipment_type: Optional[EquipmentType] = None
+    equipment_assigned_id: Optional[str] = None
+    assigned_driver_id: Optional[str] = None
+    assigned_driver_name: Optional[str] = None
+    assigned_driver_phone: Optional[str] = None
+    driver_assignment_mode: Optional[
+        Literal["default_single", "timesheet_shift", "manager_replacement"]
+    ] = None
+    hours_requested: Optional[int] = Field(default=None, gt=0)
+    shifts_requested: Optional[int] = Field(default=None, ge=1)
+    hourly_rate_agreed: Optional[Decimal] = Field(default=None, gt=0)
+    estimated_amount: Optional[Decimal] = Field(default=None, ge=0)
+    debt_amount: Optional[Decimal] = Field(default=None, ge=0)
+    paid_amount: Optional[Decimal] = Field(default=None, ge=0)
+    site_address: Optional[str] = None
+    manager: Optional[str] = None
+    attachments: Optional[List[ChatAttachment]] = None
+
+
+class CRMDealResponse(CRMDealCreate):
+    id: str
+    estimated_amount: Decimal
+    stage: CRMStage
+    debt_amount: Decimal
+    paid_amount: Decimal = Decimal("0.0")
+    date_created: date
+    shift_logs: List[DealShiftLog] = Field(default_factory=list)
+    closed_shift_hours_total: Optional[Decimal] = Decimal("0.0")
+    closed_volume_hours: Optional[Decimal] = None
+    act_signed: bool = False
+    act_number: Optional[str] = None
+    ks2_number: Optional[str] = None
+    ks3_number: Optional[str] = None
+    act_saved_to_base: bool = False
+    ks2_saved_to_base: bool = False
+    ks3_saved_to_base: bool = False
+    invoice_number: Optional[str] = None
+    invoice_date: Optional[date] = None
+    invoice_status: InvoiceStatus = InvoiceStatus.NOT_ISSUED
+    invoice_saved_to_base: bool = False
+    stage_updated_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    archived_at: Optional[datetime] = None
+
+
+class RentalOrderCreate(CamelModel):
+    branch_id: str
+    deal_id: Optional[str] = None
+    order_number: Optional[str] = None
+    client_name: str
+    client_type: ClientType = ClientType.LEGAL_ENTITY
+    has_contract: bool = True
+    accounting_subject: AccountingSubjectId = AccountingSubjectId.OOO_SPECIALTECH
+    equipment_id: str
+    operator_name: str
+    site_address: str
+    start_date: date
+    end_date: date
+    planned_hours: int = Field(..., ge=0)
+    hourly_rate: Decimal = Field(..., ge=0)
+
+
+class RentalOrderResponse(CamelModel):
+    id: str
+    branch_id: str
+    order_number: str
+    client_name: str
+    client_type: Optional[ClientType] = ClientType.LEGAL_ENTITY
+    has_contract: Optional[bool] = True
+    accounting_subject: Optional[AccountingSubjectId] = AccountingSubjectId.OOO_SPECIALTECH
+    equipment_id: str
+    equipment_name: Optional[str] = None
+    operator_name: str
+    site_address: str
+    start_date: date
+    end_date: date
+    planned_hours: int
+    actual_hours: Decimal
+    closed_volume_hours: Optional[Decimal] = None
+    hourly_rate: Decimal
+    total_amount: Decimal
+    paid_amount: Decimal
+    debt_amount: Decimal
+    act_signed: bool
+    act_number: Optional[str] = None
+    ks2_number: Optional[str] = None
+    ks3_number: Optional[str] = None
+    act_saved_to_base: bool = False
+    ks2_saved_to_base: bool = False
+    ks3_saved_to_base: bool = False
+    invoice_number: Optional[str] = None
+    invoice_date: Optional[date] = None
+    invoice_status: InvoiceStatus = InvoiceStatus.NOT_ISSUED
+    invoice_saved_to_base: bool = False
+    status: OrderStatus
+
+
+class ClosingDocumentRecord(CamelModel):
+    id: str
+    kind: ClosingDocKind
+    number: str
+    date: date
+    period_start: date
+    period_end: date
+    branch_id: str
+    source_type: Literal["order", "deal"]
+    source_id: str
+    order_or_deal_number: str
+    client_name: str
+    client_inn: Optional[str] = None
+    client_address: Optional[str] = None
+    site_address: str
+    equipment_name: str
+    operator_name: str
+    work_description: str
+    unit_label: str = Field(..., example="маш.-час")
+    quantity: Decimal = Field(..., ge=0)
+    rate_rub: Decimal = Field(..., ge=0)
+    total_amount_rub: Decimal = Field(..., ge=0)
+    vat_amount_rub: Decimal = Field(..., ge=0)  # 20% (total*20/120) для ООО ОСНО, 0 для ИП УСН
+    accounting_subject: AccountingSubjectId
+    saved_to_base: bool = True
+    saved_at: Optional[datetime] = None
+    invoice_status: Optional[InvoiceStatus] = None
+    paid_amount_rub: Optional[Decimal] = None
+    printed_count: int = 0
+    content_text: str
+
+
+class CloseVolumeRequest(CamelModel):
+    source_type: Literal["order", "deal"]
+    source_id: str
+    act_number: str
+    ks2_number: str
+    ks3_number: Optional[str] = None
+    doc_date: date
+    period_start: date
+    period_end: date
+    quantity: Decimal = Field(..., gt=0)
+    unit_label: str = "маш.-час"
+    rate_rub: Decimal = Field(..., ge=0)
+    work_description: str
+    accounting_subject: AccountingSubjectId
+
+
+class IssueInvoiceRequest(CamelModel):
+    source_type: Literal["order", "deal"]
+    source_id: str
+    invoice_number: str
+    invoice_date: date
+    period_start: date
+    period_end: date
+    quantity: Decimal = Field(..., gt=0)
+    unit_label: str = "маш.-час"
+    rate_rub: Decimal = Field(..., ge=0)
+    work_description: str
+    accounting_subject: AccountingSubjectId
+    invoice_status: InvoiceStatus = InvoiceStatus.ISSUED
+    paid_amount_rub: Decimal = Field(default=Decimal("0.0"), ge=0)
+
+
+class UpdateInvoiceStatusRequest(CamelModel):
+    invoice_status: InvoiceStatus
+    paid_amount_rub: Decimal = Field(..., ge=0)
+
+
+class StatusNotificationSettings(CamelModel):
+    enabled: bool = True
+    on_volume_close_act_ks2: bool = True
+    on_act_signed_change: bool = True
+    on_invoice_issued: bool = True
+    on_invoice_status_change: bool = True
+    send_to_branch_chat: bool = True
+    send_to_max_client_bot: bool = False
+    remind_debt_overdue_days: int = Field(default=5, ge=1, le=90)
+
+
+class StatusNotificationItem(CamelModel):
+    id: str
+    timestamp: datetime
+    branch_id: str
+    title: str
+    message: str
+    category: StatusNotificationCategory
+    entity_label: str
+    channels: List[str]
+    read: bool = False
+
+
+# ------------------------------------------------------------------------------
+# 2.7. Консолидированная аналитика филиалов, заказчики и справочник реквизитов
+# ------------------------------------------------------------------------------
+
+class BranchPeriodFinancials(CamelModel):
+    branch_id: str
+    branch_code: str
+    branch_name: str
+    equipment_count: int
+    rented_count: int
+    hours: Decimal
+    downtime_hours: Decimal = Decimal("0.0")
+    utilization_pct: float
+    mileage_km: Decimal = Decimal("0.0")
+    trips_count: int = 0
+    revenue: Decimal
+    fuel_cost: Decimal
+    salary_cost: Decimal
+    repair_cost: Decimal
+    transport_cost: Decimal
+    subcontract_cost: Decimal
+    direct_costs: Decimal
+    fixed_overheads_total: Decimal
+    fixed_by_category: Dict[BranchOverheadCategory, Decimal]
+    equipment_overheads: Decimal
+    total_overheads: Decimal
+    total_expenses: Decimal
+    gross_profit: Decimal
+    gross_margin_pct: float
+    operating_profit: Decimal
+    operating_margin_pct: float
+    revenue_share_pct: float
+    profit_share_pct: float
+    profit_per_unit: Decimal
+    revenue_per_hour: Decimal
+    total_cost_per_hour: Decimal
+    direct_cost_per_hour: Decimal = Decimal("0.0")
+
+
+class ConsolidatedBranchSummary(CamelModel):
+    period_label: str
+    active_months_count: int
+    branch_rows: List[BranchPeriodFinancials]
+    totals: BranchPeriodFinancials
+
+
+class BranchCustomerRowResponse(CamelModel):
+    client_name: str
+    full_name: str
+    is_regular_max: bool
+    opf: str
+    inn: str
+    kpp: str
+    ogrn: str
+    legal_address: str
+    director: str
+    bank_name: str
+    bik: str
+    checking_account: str
+    corr_account: str
+    email: str
+    site_address: str
+    all_sites: List[str]
+    contact_person: str
+    phone: str
+    has_contract: bool
+    deals_count: int
+    orders_count: int
+    total_hours_worked: Decimal
+    last_contract_number: str
+    last_contract_caption: str
+    latest_order_number: Optional[str] = None
+    latest_deal_id: Optional[str] = None
+    is_active: bool
+    status_detail: str
+    turnover_rub: Decimal
+    paid_rub: Decimal
+    debt_rub: Decimal
+    subject_id: AccountingSubjectId
+    manager_name: str
+
+
+class CustomerCreate(CamelModel):
+    primary_branch_id: str
+    client_type: ClientType = ClientType.LEGAL_ENTITY
+    name: str
+    full_name: Optional[str] = None
+    opf: Optional[str] = None
+    inn: Optional[str] = None
+    kpp: Optional[str] = None
+    ogrn: Optional[str] = None
+    legal_address: Optional[str] = None
+    director: Optional[str] = None
+    bank_name: Optional[str] = None
+    bik: Optional[str] = None
+    checking_account: Optional[str] = None
+    corr_account: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    is_regular_max: bool = False
+
+
+class CustomerUpdate(CamelModel):
+    name: Optional[str] = None
+    full_name: Optional[str] = None
+    opf: Optional[str] = None
+    inn: Optional[str] = None
+    kpp: Optional[str] = None
+    ogrn: Optional[str] = None
+    legal_address: Optional[str] = None
+    director: Optional[str] = None
+    bank_name: Optional[str] = None
+    bik: Optional[str] = None
+    checking_account: Optional[str] = None
+    corr_account: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    credit_limit: Optional[Decimal] = None
+    is_regular_max: Optional[bool] = None
+    notes: Optional[str] = None
+
+
+# ------------------------------------------------------------------------------
+# 2.8. Юридический реестр, База знаний RAG, 1С, Телеметрия и Админ-панель
+# ------------------------------------------------------------------------------
+
+class LegalDocumentCreate(CamelModel):
+    number: str
+    title: str
+    kind: LegalDocKind
+    branch_id: Optional[str] = None  # Опциональная привязка к участку; сам юр. реестр единый на компанию
+    counterparty: str
+    accounting_subject: AccountingSubjectId
+    status: LegalDocStatus = LegalDocStatus.DRAFT
+    amount_rub: Decimal = Decimal("0.0")
+    dispute_amount_rub: Optional[Decimal] = None
+    dispute_reason: Optional[str] = None
+    linked_order_number: Optional[str] = None
+    in_knowledge_base: bool = False
+    content: str
+
+
+class LegalDocumentUpdate(CamelModel):
+    title: Optional[str] = None
+    status: Optional[LegalDocStatus] = None
+    amount_rub: Optional[Decimal] = None
+    dispute_amount_rub: Optional[Decimal] = None
+    dispute_reason: Optional[str] = None
+    content: Optional[str] = None
+    action_details: Optional[str] = None
+
+
+class LegalDocumentResponse(LegalDocumentCreate):
+    id: str
+    created_at: date
+    updated_at: date
+    author_name: str
+
+
+class LegalHistoryEntryResponse(CamelModel):
+    id: str
+    document_id: str
+    document_number: str
+    document_title: str
+    action: Literal[
+        "created", "updated", "imported", "exported", "saved_to_base", "status_changed", "dispute_opened"
+    ]
+    actor_role: LegalRole
+    actor_name: str
+    timestamp: str
+    details: str
+
+
+class LegalPublishToKbRequest(CamelModel):
+    mode: Literal["anonymized", "full"] = "anonymized"
+    target_category: KnowledgeCategory
+
+
+class LegalExportLogRequest(CamelModel):
+    document_id: Optional[str] = None
+    details: str
+
+
+class AutoCustomerContractRequest(CamelModel):
+    branch_id: str
+    client_name: str
+    subject_id: AccountingSubjectId
+    has_contract: bool = True
+    order_number: Optional[str] = None
+
+
+class KnowledgeDocCreate(CamelModel):
+    title: str
+    category: KnowledgeCategory
+    code: str
+    excerpt: str
+    tags: List[str] = Field(default_factory=list)
+    full_text: str
+
+
+class KnowledgeDocResponse(KnowledgeDocCreate):
+    id: str
+    date_updated: date
+
+
+class OneCSubjectConfig(CamelModel):
+    id: AccountingSubjectId
+    entity_name: str
+    short_name: str
+    tax_system: str
+    inn: str
+    odata_url: str
+    api_login: str
+    api_secret: str = ""
+    exchange_format: Literal["odata_v3", "rest_http_service"]
+    auto_sync_docs: bool
+    enabled: bool
+    connection_status: Literal["connected", "disconnected", "error"]
+    last_checked_at: Optional[str] = None
+
+
+class OneCRoutingRules(CamelModel):
+    legal_entity_target: AccountingSubjectId
+    individual_with_contract_target: AccountingSubjectId
+    individual_without_contract_target: AccountingSubjectId
+    allow_individual_without_contract: bool
+    require_contract_for_legal_entity: bool
+
+
+class OneCIntegrationConfig(CamelModel):
+    subjects: Dict[AccountingSubjectId, OneCSubjectConfig]
+    routing: OneCRoutingRules
+
+
+class MaxCustomerBotConfig(CamelModel):
+    enabled: bool
+    allow_new_rental_requests: bool
+    allow_shift_hour_confirmation: bool
+    allow_site_chat_and_photos: bool
+    auto_route_to_1c: bool = Field(default=True, alias="autoRouteTo1C")
+    require_manager_moderation: bool
+
+
+class TableViewSettings(CamelModel):
+    label: str
+    density: Literal["compact", "normal", "comfortable"] = "normal"
+    page_size: int = Field(default=25, ge=5, le=200)
+    allow_excel_export: bool = True
+    show_branch_code: bool = True
+    available_columns: List[str] = Field(default_factory=list)
+    visible_columns: List[str] = Field(default_factory=list)
+
+
+class LlmAdminSettings(CamelModel):
+    provider: Literal["gemini_proxy", "openai_compatible", "local_vllm"] = "gemini_proxy"
+    model: str = "gemini-4-hydrogen"
+    proxy_endpoint: str = "/api/ai-analyst"
+    server_token_env_var: str = "GEMINI_API_KEY"
+    max_output_tokens: int = Field(default=4096, ge=256, le=32768)
+    context_window_tokens: int = Field(default=128000, ge=4096)
+    thinking_token_budget: int = Field(default=1024, ge=0, le=16384)
+    temperature: float = Field(default=0.2, ge=0.0, le=2.0)
+    top_p: float = Field(default=0.9, ge=0.0, le=1.0)
+    timeout_sec: int = Field(default=30, ge=5, le=180)
+    response_format: Literal["json", "text"] = "json"
+    system_instruction_suffix: str = ""
+
+
+class RagBaseAdminSettings(CamelModel):
+    storage_mode: Literal["local_hybrid", "postgres_pgvector", "onec_sync"] = "local_hybrid"
+    vector_engine: Literal["faiss_flat", "faiss_hnsw", "pgvector"] = "faiss_hnsw"
+    embedding_model: str = "text-embedding-004"
+    chunk_size_tokens: int = Field(default=512, ge=128, le=4096)
+    chunk_overlap_tokens: int = Field(default=64, ge=0, le=512)
+    top_k: int = Field(default=5, ge=1, le=25)
+    min_similarity: float = Field(default=0.72, ge=0.0, le=1.0)
+    auto_reindex_on_save: bool = True
+    indexed_categories: List[KnowledgeCategory] = Field(default_factory=list)
+    last_indexed_at: str
+
+
+class RoleAccessFieldsPolicy(CamelModel):
+    can_view_financial_margin: bool
+    can_edit_payroll: bool
+    can_approve_shifts: bool
+    can_view_driver_max_phones: bool
+    can_edit_knowledge_base: bool
+    can_access_fixed_costs_table: bool
+    can_access_variable_costs_table: bool
+
+
+class RoleAccessPolicy(CamelModel):
+    role: SystemRoleId
+    label: str
+    description: str
+    pages: Dict[str, PageAccessLevel]
+    fields: RoleAccessFieldsPolicy
+
+
+class TelemetryEquipmentBinding(CamelModel):
+    tracker_imei: str = Field(..., min_length=8, max_length=32, example="864290041120911")
+    dut_enabled: bool = True
+    can_enabled: bool = True
+    status: Literal["online", "offline"] = "online"
+
+
+class TelemetrySensorsFlags(CamelModel):
+    gnss_position: bool = True
+    fuel_level_dut: bool = True
+    can_bus_hour_meter: bool = True
+    ignition_and_pto: bool = True
+    axle_load_weight: bool = True
+    boom_tilt_and_safety: bool = True
+    hydraulic_and_engine_temp: bool = True
+
+
+class TelemetrySensorsAdminSettings(CamelModel):
+    enabled: bool = True
+    provider: TelemetryProvider = TelemetryProvider.WIALON_IPS
+    protocol: TelemetryProtocol = TelemetryProtocol.WIALON_IPS_V2
+    endpoint_url: str = "https://telematics.specialtech.local/api/v2"
+    server_port: int = Field(default=20332, ge=1, le=65535)
+    poll_interval_sec: int = Field(default=30, ge=5, le=3600)
+    server_token_env_var: str = "GLONASS_API_TOKEN"
+    last_sync_at: Optional[str] = None
+    sensors: TelemetrySensorsFlags
+    fuel_drain_threshold_liters: float = Field(default=15.0, ge=1.0)
+    fuel_refuel_threshold_liters: float = Field(default=20.0, ge=1.0)
+    hour_meter_tolerance_percent: float = Field(default=8.0, ge=0.0, le=100.0)
+    geofence_radius_meters: int = Field(default=250, ge=10)
+    idle_engine_alert_minutes: int = Field(default=30, ge=1)
+    auto_match_shift_hours_with_can: bool = True
+    auto_flag_fuel_anomaly: bool = True
+    send_alerts_to_operational_chat: bool = True
+    equipment_bindings: Dict[str, TelemetryEquipmentBinding] = Field(default_factory=dict)
+
+
+class TelemetryConnectionTestRequest(CamelModel):
+    provider: TelemetryProvider
+    protocol: TelemetryProtocol
+    endpoint_url: str
+    server_port: int
+    poll_interval_sec: int
+
+
+class TelemetryConnectionTestResponse(CamelModel):
+    connected: bool
+    checked_at: str
+    message: str
+
+
+class SystemAdminConfig(CamelModel):
+    tables: Dict[TableViewId, TableViewSettings]
+    llm: LlmAdminSettings
+    knowledge_rag: RagBaseAdminSettings
+    telemetry_sensors: TelemetrySensorsAdminSettings
+    access_policies: Dict[SystemRoleId, RoleAccessPolicy]
+    admin_confirmation_allowed: bool = False
+
+
+class ConfirmationGatePatch(CamelModel):
+    admin_confirmation_allowed: bool
+
+
+class FileUploadResponse(CamelModel):
+    id: str
+    name: str
+    size: int
+    mime_type: str
+    category: Literal["requisites", "site_photo", "other"]
+    preview_url: str
+
+
+# ------------------------------------------------------------------------------
+# 2.9. Встроенный LLM-агент операционного чата (/api/chat-agent) и Контекст
+# ------------------------------------------------------------------------------
+
+class ChatAgentHistoryTurn(CamelModel):
+    role: Literal["user", "assistant"]
+    text: str
+
+
+class ChatAgentSourceMatch(CamelModel):
+    source_type: Literal[
+        "chat", "knowledge", "crm", "order", "fleet", "driver", "legal", "closing_doc"
+    ]
+    title: str
+    detail: str
+
+
+class ChatAgentQueryRequest(CamelModel):
+    query: str = Field(..., min_length=1)
+    history: List[ChatAgentHistoryTurn] = Field(default_factory=list)
+    branch_id: Optional[str] = None
+    branch_name: str = "Все участки"
+    # На FastAPI при branch_id сервер сам дочитывает срезы из PostgreSQL;
+    # поля ниже сохранены для обратной совместимости с прокси server.ts
+    chat_messages: List[Dict[str, Any]] = Field(default_factory=list)
+    knowledge_base: List[Dict[str, Any]] = Field(default_factory=list)
+    crm_deals: List[Dict[str, Any]] = Field(default_factory=list)
+    rental_orders: List[Dict[str, Any]] = Field(default_factory=list)
+    fleet_units: List[Dict[str, Any]] = Field(default_factory=list)
+    drivers: List[Dict[str, Any]] = Field(default_factory=list)
+    legal_documents: List[Dict[str, Any]] = Field(default_factory=list)
+    closing_docs: List[Dict[str, Any]] = Field(default_factory=list)
+    shift_reports: List[Dict[str, Any]] = Field(default_factory=list)
+    llm_config: Optional[Dict[str, Any]] = None
+
+
+class ChatAgentQueryData(CamelModel):
+    answer: str
+    chat_summary: str = ""
+    suggested_reply: str = ""
+    matched_sources: List[ChatAgentSourceMatch] = Field(default_factory=list)
+
+
+class ChatAgentQueryResponse(CamelModel):
+    success: bool
+    model: str
+    data: ChatAgentQueryData
+
+
+class WorkspaceBootstrapResponse(CamelModel):
+    active_branch_id: str = "branch-hq"
+    branches: List[FleetBranchResponse]
+    equipment_list: List[EquipmentResponse]
+    deals: List[CRMDealResponse]
+    orders: List[RentalOrderResponse]
+    closing_docs: List[ClosingDocumentRecord]
+    shift_reports: List[ShiftReportResponse]
+    drivers: List[DriverProfileResponse]
+    driver_replacements: Dict[str, DriverReplacementRecord]
+    anomalies: List[Dict[str, Any]]
+    chat_messages: List[ChatMessageResponse]
+    legal_documents: List[LegalDocumentResponse]
+    legal_history: List[LegalHistoryEntryResponse]
+    knowledge_docs: List[KnowledgeDocResponse]
+    max_bot_configs: Dict[str, MaxCustomerBotConfig]
+    one_c_config: OneCIntegrationConfig = Field(..., alias="oneCConfig")
+    admin_config: SystemAdminConfig
+    notification_settings: StatusNotificationSettings
+    status_notifications: List[StatusNotificationItem]
+```
+
+
+================================================================================
+3. СПЕЦИФИКАЦИЯ ЭНДПОИНТОВ FASTAPI (REST API V1)
+================================================================================
+
+--------------------------------------------------------------------------------
+3.0. МОДУЛЬ ИНИЦИАЛИЗАЦИИ РАБОЧЕГО ПРОСТРАНСТВА (/api/v1/workspace)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/workspace/bootstrap
+   - Описание: Единая начальная гидрация SPA (замена 19 ключей localStorage при запуске).
+   - Query параметры: `branch_id` (optional, иначе берётся профиль пользователя / `all`).
+   - Бизнес-логика изоляции (2 контура):
+     * Контур А (обособленный операционный поток по `branch_id`): при `branch.documentFlow.isolateCrmAndErp == true` фильтрует операционные массивы (`equipment_list`, `deals`, `orders`, `shift_reports`, `anomalies`, `chat_messages`, `drivers`, `closing_docs`, `status_notifications`) по `branch_id`, сохраняя полный справочник `branches`.
+     * Контур Б (общие модули без принудительного разделения): `legal_documents` («Договоры и юротдел»), `legal_history`, `knowledge_docs` (База знаний RAG), `oneCConfig` (субъекты 1С), `adminConfig` (настройки и аналитические таблицы руководителя).
+     * Перед отдачей `deals` автоматически прогоняет правило ретенции 48 ч (завершённые с `debt_amount <= 0` после 2 дней помечаются `archived_at`).
+   - Ответ (200 OK): `WorkspaceBootstrapResponse`.
+
+2. PUT /api/v1/workspace/active-branch
+   - Тело: `{ "branch_id": "branch-hq" | "all" }`
+   - Описание: Фиксация активного участка/режима `[ВСЕ]` в сессии пользователя.
+
+
+--------------------------------------------------------------------------------
+3.1. МОДУЛЬ АУТЕНТИФИКАЦИИ И ПОЛЬЗОВАТЕЛЕЙ (/api/v1/auth)
+--------------------------------------------------------------------------------
+
+1. POST /api/v1/auth/login
+   - Описание: Авторизация по логину/email и паролю, получение JWT Access/Refresh токенов.
+   - Тело запроса: { "username": "fm@specialtech.ru", "password": "Password123!" }
+   - Ответ (200 OK):
+     {
+       "accessToken": "eyJhbGciOi...",
+       "refreshToken": "eyJhbGciOi...",
+       "tokenType": "bearer",
+       "expiresIn": 3600,
+       "user": {
+         "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         "fullName": "Волков И. А.",
+         "role": "fleet_manager",
+         "branchId": "branch-kzn"
+       }
+     }
+
+2. POST /api/v1/auth/refresh
+   - Тело запроса: { "refreshToken": "eyJhbGciOi..." }
+   - Ответ (200 OK): { "accessToken": "...", "refreshToken": "..." }
+
+3. GET /api/v1/auth/me
+   - Заголовки: Authorization: Bearer <token>
+   - Ответ (200 OK): Профиль пользователя и активная RBAC-политика `RoleAccessPolicy`.
+
+
+--------------------------------------------------------------------------------
+3.2. МОДУЛЬ ПАРКА СПЕЦТЕХНИКИ (/api/v1/fleet)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/fleet/equipment
+   - Query параметры: `branch_id`, `type`, `status`, `search`, `sort_by` (profit|revenue|hours|margin), `page`, `limit`.
+   - Ответ (200 OK): { "total": 12, "page": 1, "limit": 50, "items": [ EquipmentResponse, ... ] }
+
+2. GET /api/v1/fleet/equipment/{id}
+   - Ответ (200 OK): EquipmentResponse с разбивкой прямых затрат (ГСМ, ЗП, ремонт, трал, субподряд) и ТО.
+
+3. POST /api/v1/fleet/equipment
+   - Роли: admin, top_manager, fleet_manager.
+   - Тело: EquipmentCreate -> Ответ (201 Created): EquipmentResponse.
+
+4. PATCH /api/v1/fleet/equipment/{id}
+   - Описание: Обновление параметров единицы техники (вкл. переназначение объекта `assigned_site` из FleetManagerView, машиниста, ставок, переработки, заметок).
+   - Тело: EquipmentUpdate -> Ответ (200 OK): EquipmentResponse.
+
+5. PATCH /api/v1/fleet/equipment/{id}/status
+   - Тело: { "status": "maintenance", "reason": "Плановое ТО-2", "assignedSite": "Ремзона" }
+   - Ответ (200 OK): Обновлённая карточка техники.
+
+6. PUT /api/v1/fleet/equipment/bulk-costs
+   - Описание: Массовое обновление прямых (переменных) затрат парка из таблицы администратора (`AdminCostTablesSection`).
+   - Важно: `AdminCostTablesSection` передаёт `equipmentId`, `fuelCostMonth`, `driverSalaryMonth`, `repairCostMonth`, `transportCostMonth` (остальные поля в `EquipmentVariableCostsPatch` опциональны и при отсутствии не перезаписываются).
+   - Роли: admin, top_manager, accountant (проверка `fields.can_access_variable_costs_table`).
+   - Тело: `List[EquipmentVariableCostsPatch]` -> Ответ (200 OK): `{ "updated": 12 }`.
+
+
+--------------------------------------------------------------------------------
+3.3. МОДУЛЬ АНАЛИТИКИ ПО ПЕРИОДАМ, ФИЛИАЛАМ И ЗАКАЗЧИКАМ (/api/v1/analytics)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/analytics/equipment-ranking
+   - Описание: Таблица «Рейтинг техники по операционной прибыли» за день, конкретный месяц или весь год («Все»).
+     Самосвалы выделяются в отдельный завершающий блок с выводом количества рейсов (`trips_count`) вместо моточасов.
+   - Query параметры:
+     * `branch_id` (optional): string | "all"
+     * `mode`: "date" | "month"
+     * `selected_date` (when mode=date): YYYY-MM-DD
+     * `selected_year` (when mode=month): YYYY
+     * `selected_month` (when mode=month): "all" | "01".."12"
+   - Ответ (200 OK):
+     {
+       "main_equipment": [
+         {
+           "equipment": EquipmentResponse,
+           "hours": 182.0,
+           "mileage_km": 420.0,
+           "trips_count": 0,
+           "revenue": 873600.0,
+           "expenses": 342100.0,
+           "profit": 531500.0,
+           "margin": 60.8
+         }
+       ],
+       "dump_trucks": [
+         {
+           "equipment": EquipmentResponse,
+           "hours": 198.0,
+           "mileage_km": 4850.0,
+           "trips_count": 146,
+           "revenue": 475200.0,
+           "expenses": 298000.0,
+           "profit": 177200.0,
+           "margin": 37.3
+         }
+       ]
+     }
+
+2. GET /api/v1/analytics/direct-costs
+   - Описание: «Структура прямых расходов» за выбранный период (дата / месяц / год «Все»), включая строку «Субподряд».
+   - Query параметры: `branch_id`, `mode` (date|month), `selected_date`, `selected_year`, `selected_month`.
+   - Ответ (200 OK):
+     {
+       "fuel_cost": 412000.0,
+       "salary_cost": 389000.0,
+       "repair_cost": 145000.0,
+       "transport_cost": 88000.0,
+       "subcontract_cost": 120000.0,
+       "total_direct_costs": 1154000.0,
+       "total_hours": 920.0,
+       "avg_cost_per_hour": 1254.0
+     }
+
+3. GET /api/v1/analytics/fixed-overheads
+   - Описание: Сводка «Постоянные расходы участка» по 5 упрощённым категориям (`office_itr_salary`, `aho`, `leasing`, `taxes`, `other`).
+   - Query параметры: `branch_id`, `mode`, `selected_year`, `selected_month` (при `"all"` — расчёт за год).
+   - Ответ (200 OK): `{ "total": 1105000.0, "by_category": {...}, "items": [...] }`
+
+4. GET /api/v1/analytics/branches-consolidated
+   - Описание: Сводная аналитика по всем участкам (`AllBranchesFinancialTables`) — три блока:
+     «Прибыль по филиалам», «Расходы по филиалам» (прямые + 5 постоянных + накладные парка), «Сводный финансовый расчёт (ОПиУ)».
+   - Query параметры: `mode` (date|month), `selected_date`, `selected_year`, `selected_month`.
+   - Ответ (200 OK): `ConsolidatedBranchSummary`.
+
+5. GET /api/v1/analytics/customers
+   - Описание: Агрегированный каталог заказчиков участка (`buildBranchCustomerRows`) с реквизитами (ИНН, КПП, ОГРН, банк), заказами, сделками, договорами и дебиторкой.
+   - Query параметры: `branch_id` (required), `period_mode` (all|date|month|year), `date`, `month`, `year`.
+   - Ответ (200 OK): `List[BranchCustomerRowResponse]`.
+
+
+--------------------------------------------------------------------------------
+3.4. МОДУЛЬ УЧАСТКОВ/ФИЛИАЛОВ И ПОСТОЯННЫХ РАСХОДОВ (/api/v1/branches)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/branches
+   - Описание: Список всех участков/филиалов с настройками потоков документов и статьями условно-постоянных расходов (в т.ч. `details` и `hidden`).
+   - Ответ (200 OK): List[FleetBranchResponse].
+
+2. POST /api/v1/branches
+   - Описание: Создание нового филиала; при пустых префиксах автоматически подставляет `RO-{CODE}-`, `ПЛ-{CODE}-`, `SH-{CODE}-`, `КС2-{CODE}-`, `ПОДР-{CODE}-01` (`handleCreateBranch`).
+   - Тело: FleetBranchCreate -> Ответ (201 Created): FleetBranchResponse.
+
+3. PATCH /api/v1/branches/{branch_id}
+   - Описание: Обновление реквизитов участка, изолированных префиксов (`orderPrefix`, `waybillPrefix`, `shiftPrefix`, `actPrefix`), кода подразделения 1С, субъекта по умолчанию и списка `fixedOverheads`.
+   - Бизнес-логика синхронизации префиксов (в одной SQL-транзакции, соответствует `handleSaveBranch` в `App.tsx`):
+     при изменении префиксов автоматически каскадно обновляются номера и тексты связанных записей участка в 7 сущностях:
+     1) `erp.rental_orders` (`order_number`, `act_number`, `ks2_number`)
+     2) `crm.deals` (`act_number`, `ks2_number`)
+     3) `forms.closing_documents` (`doc_number`, `order_or_deal_number` + **полный пересчёт печатного `content_text`**)
+     4) `erp.contracts` (`leg-cdoc-*` синхронизируются 1:1 с `closing_documents`; остальные — `number`, `linked_order_number`, `title`, `content`, `dispute_reason`)
+     5) `forms.shift_reports` (`shift_number`, `waybill_number`)
+     6) `audit.anomaly_alerts` (`title`, `description`)
+     7) `crm.client_communications` (`message_text`, `confirmation.shiftNumber`)
+     При изменении `actPrefix` одновременно синхронизируются ведущие префиксы `КС2-` и производный `АКТ-` (`deriveActServicesPrefix`).
+   - Тело: FleetBranchUpdate -> Ответ (200 OK): FleetBranchResponse.
+
+4. PUT /api/v1/branches/{branch_id}/overheads
+   - Описание: Обновление/добавление/удаление статей условно-постоянных расходов участка (`office_itr_salary`, `aho`, `leasing`, `taxes`, `other`).
+   - Инвариант детализации: если у статьи передан непустой массив `details`, `monthly_amount_rub` принудительно пересчитывается на сервере как `SUM(detail.amount_rub)`.
+   - Тело: `List[BranchFixedOverheadItem]` -> Ответ (200 OK): FleetBranchResponse.
+
+5. PATCH /api/v1/branches/{branch_id}/overheads/{item_id}/visibility
+   - Описание: Быстрое скрытие или восстановление строки расхода («Скрыть»).
+   - Тело: `{ "hidden": true }` -> Ответ (200 OK): BranchFixedOverheadItem.
+
+6. GET /api/v1/branches/{branch_id}/overheads/{item_id}/details  и  PUT /api/v1/branches/{branch_id}/overheads/{item_id}/details
+   - Описание: Чтение и сохранение расшифровки статьи (модальное окно «Статья расходов» в `BranchesView`: добавление/удаление позиций `BranchOverheadDetailRow` с автопересчётом `monthly_amount_rub`).
+   - Ответ (200 OK): `{ "item": BranchFixedOverheadItem, "details": List[BranchOverheadDetailRow] }`.
+
+
+--------------------------------------------------------------------------------
+3.5. МОДУЛЬ ТАБЕЛЕЙ И СМЕН МАШИНИСТОВ (/api/v1/timesheets)
+--------------------------------------------------------------------------------
+
+1. POST /api/v1/timesheets/shifts/submit
+   - Описание: Подача сменного рапорта ЭСМ-7 (`QuickShiftModal`) с опциональным путевым листом (`waybill_generated`), пробегом (`mileage_km`), рейсами (`trips_count`), субподрядом (`subcontract_cost_rub`) и расходами по корпоративной карте.
+   - Тело запроса: ShiftReportCreate.
+   - Атомарная бизнес-логика расчёта и валидации (соответствует `QuickShiftModal` + `App.tsx:handleCreateShift`):
+     * `work_hours = max(0, end_hours - start_hours)`
+     * `relocation_hours`: если не передано вручную, вычисляется из разницы `work_start_time - shift_start_time`.
+     * `calculated_salary = (work_hours + relocation_hours) * (700 если crane иначе 550)`.
+     * **5 неблокирующих правил аномалий** (устанавливают `status='anomaly'` и формируют `audit.anomaly_alerts` с `impact_rubles=15000`, `category='shift'`; техника НЕ блокируется):
+       1. `end_hours < start_hours`
+       2. `work_hours > 24`
+       3. `payment_category != 'fuel_for_equipment'` и `work_hours > 0` и `fuel_hourly > eq.fuel_rate_hour * 1.2` (+20%)
+       4. `downtime_hours > 2` без указания `downtime_reason`
+       5. `payment_category == 'fuel_for_equipment'` и не указан `payment_target_equipment_id`
+      * **5-звенный поток смены / бота водителя MAX**: сервер проверяет единый `branch_id` для связки `driver_id` + `card_last4` + `equipment_id` + (`client_id` / `order_id` / `deal_id`), иначе `422 Unprocessable Entity`. При наличии расхода по корпоративной карте (`payment_amount_rub > 0` или заправка по `card_last4`) автоматически создаётся запись в `driver.driver_card_transactions`.
+      * **Запрет межфилиального перелива ГСМ**: если `payment_category == 'fuel_for_equipment'`, сервер обязан проверить, что `payment_target_equipment_id` принадлежит тому же `branch_id`, что и исходная техника `equipment_id` (иначе `422 Unprocessable Entity` / `400 Bad Request`: перелив ГСМ между разными участками невозможен по определению — разные города). Дублируется составным внешним ключом `fk_shifts_target_eq_branch` в PostgreSQL.
+      * **Пересчёт экономики парка (`fleet.equipment`)**:
+        - `current_hours += work_hours`, `month_hours += work_hours`, `revenue_month += work_hours * eq.hourly_rate`
+        - `mileage_km_month += mileage_km`, `next_maintenance_in_hours = max(0, next_maintenance_in_hours - work_hours)`
+        - для `dump_truck`: `trips_month += trips_count`; `driver_salary_month += calculated_salary`; `subcontract_cost_month += subcontract_cost_rub`
+        - сумма расхода = `payment_amount_rub ?? fuel_liters_added * 65`:
+          - `fuel_own_tank` (или None) -> `eq.fuel_cost_month += сумма`
+          - `fuel_for_equipment` -> **перебрасывается на `target_eq.fuel_cost_month += сумма` строго в пределах того же `branch_id`** (у исходной техники ГСМ = 0)
+          - `parts` -> `eq.repair_cost_month += сумма`
+          - `other` -> `eq.overheads_allocated += сумма` (синхронизировано 1:1 с `App.tsx:handleCreateShift`)
+      * При `waybill_generated == True` автоматически создаётся запись в `forms.waybills`.
+   - Ответ (201 Created): ShiftReportResponse.
+
+2. GET /api/v1/timesheets/shifts
+   - Query параметры: `branch_id`, `date_from`, `date_to`, `equipment_id`, `status`.
+   - Ответ (200 OK): List[ShiftReportResponse].
+
+3. POST /api/v1/timesheets/shifts/{id}/approve
+   - Описание: Окончательное утверждение/закрытие смены ЭСМ-7 (`TimesheetsView`).
+   - **Двойной серверный замок (Guard)**:
+     * Проверка `system_admin_config.admin_confirmation_allowed == True` (иначе `403 Forbidden`);
+     * Проверка наличия хотя бы одной активной сделки (`crm.deals.stage = 'active'`) или активного заказа (`erp.rental_orders.status = 'active'`) по текущему участку (`has_active_request`, иначе `409 Conflict`).
+   - Ответ (200 OK): ShiftReportResponse (`status='approved'`).
+
+4. PATCH /api/v1/timesheets/shifts/{id}/moderate  (алиас POST поддерживается)
+   - Описание: Редактирование параметров смены начальником участка (`FleetManagerView`) — корректировка часов (`work_hours`), простоя (`downtime_hours`), заправленного топлива, статуса проверки (`pending|approved|anomaly`), комментария и начисленной ЗП. При изменении `work_hours` пересчитывается дельта наработки/выручки/ТО в `fleet.equipment`.
+   - Тело: ShiftModerateRequest -> Ответ (200 OK): ShiftReportResponse.
+
+5. POST /api/v1/timesheets/ocr-meter  (реализовано в server.ts как POST /api/ocr-shift)
+   - Описание: Распознавание счётчика моточасов/рапорта с фото.
+   - Тело: `{ "imageBase64": "...", "equipmentType": "excavator" }` или Multipart.
+   - Ответ (200 OK):
+     {
+       "success": true,
+       "extractedData": {
+         "hourMeterPhotoConfidence": 0.96,
+         "detectedStartHours": 4120,
+         "detectedEndHours": 4130.5,
+         "calculatedWorkHours": 10.5,
+         "estimatedFuelConsumptionLiters": 189,
+         "anomalyScore": 0.04,
+         "status": "verified"
+       }
+     }
+
+
+--------------------------------------------------------------------------------
+3.6. МОДУЛЬ CRM И АРЕНДЫ (/api/v1/crm & /api/v1/rentals)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/crm/deals/kanban
+   - Query параметры: `branch_id` (optional), `include_archived` (bool, default=false).
+   - Примечание по 7-колоночному представлению UI: на уровне БД хранятся 5 канонических стадий `CRMStage` (`lead`, `calculation`, `contract`, `active`, `completed`), а фронтенд `CrmView` проецирует их в 7 рабочих этапов (`lead`, `order_approval`, `active`, `close_shift`, `close_volume`, `act_invoice`, `completed`). Завершённые с `debt_amount > 0` остаются видимыми в «Оплата / Дебиторка», а с `debt_amount <= 0` — ровно 48 часов до архивации.
+   - Ответ (200 OK): `{ "deals": List[CRMDealResponse], "activeCount": 14 }`.
+
+2. POST /api/v1/crm/deals
+   - Описание: Создание заявки контрагента (`NewDealModal`, `MaxCustomerBotPanel`) с автомаршрутизацией субъекта 1С (ООО / ИП) и сохранением списка вложений (`attachments[]`).
+   - Тело: CRMDealCreate -> Ответ (201 Created): CRMDealResponse.
+
+3. PATCH /api/v1/crm/deals/{id}
+   - Описание: Обновление данных сделки (назначение техники/водителя, часы, ставка, оплата/долг, вложения).
+   - Тело: CRMDealUpdate -> Ответ (200 OK): CRMDealResponse.
+
+4. PATCH /api/v1/crm/deals/{id}/stage
+   - **Серверные ограничения перехода (`handleMoveDealStage`)**:
+     * Переход в `completed` ЗАПРЕЩЁН (`422 Unprocessable Entity`), если НЕ выполнен ни один признак закрытия документов (`act_signed || act_saved_to_base || ks2_saved_to_base || ks3_saved_to_base`) ИЛИ если `debt_amount > 0`!
+     * При переходе в `completed` проставляется `completed_at = now()`, `archived_at = None`, `stage_updated_at = now()`; при переходе на другую стадию `completed_at` очищается.
+   - Тело: `{ "stage": "active" }` -> Ответ (200 OK): CRMDealResponse.
+
+5. POST /api/v1/crm/deals/{deal_id}/close-shift
+   - Описание: Закрытие конкретной смены по заявке CRM (`CrmView`).
+   - **Инвариант**: не более 2 смен на одну календарную дату (слот `1` или `2`, при дубле слота или >= 2 смен на дату возвращается `409 Conflict`), часы ограничиваются `1..12`. Пересчитывает `closed_shift_hours_total` и публикует сообщение в операционный чат участка (`crm.client_communications`).
+   - Тело: CloseDealShiftRequest -> Ответ (201 Created): `{ "deal": CRMDealResponse, "shiftLog": DealShiftLog, "chatMessage": ChatMessageResponse }`.
+
+6. POST /api/v1/crm/deals/{deal_id}/close-volume
+   - Описание: Быстрое закрытие объёма работ прямо с карточки CRM (`CrmView: handleCloseDealVolume`) по количеству часов `{ "volumeHours": 120 }`. Автоматически формирует номера по префиксам участка (`АКТ-...`, `КС2-...`, `КС3-{CODE}-CRM-...`) и вызывает общую логику `/api/v1/closing-docs/close-volume`.
+   - Тело: `{ "volumeHours": Decimal }` -> Ответ (201 Created): `{ "deal": CRMDealResponse, "act": ClosingDocumentRecord, "ks2": ClosingDocumentRecord, "ks3": ClosingDocumentRecord, "notification": StatusNotificationItem }`.
+
+7. POST /api/v1/crm/deals/archive-expired
+   - Описание: Регламентная очистка (cron / при открытии): сделки в статусе `completed` с `debt_amount <= 0` спустя **48 часов** от `completed_at` помечаются `archived_at = now()`; при появлении долга (`debt_amount > 0`) автоматически возвращаются в `active`.
+   - Ответ (200 OK): `{ "archivedCount": 3, "revertedToActiveCount": 0 }`.
+
+8. GET /api/v1/rentals/orders  и  POST /api/v1/rentals/orders
+   - Query: `branch_id`, `status`, `act_pending`, `has_debt`.
+   - Ответ: List[RentalOrderResponse] / RentalOrderResponse (201).
+
+9. PATCH /api/v1/rentals/orders/{id}/toggle-act
+   - Описание: Подписание или отзыв Акта КС-2 по заказу с отправкой уведомления о статусе (при `notification_settings.on_act_signed_change == True`).
+   - Ответ (200 OK): `{ "id": "...", "actSigned": true, "signedAt": "...", "notification": Optional[StatusNotificationItem] }`
+
+
+--------------------------------------------------------------------------------
+3.7. МОДУЛЬ ЗАКРЫВАЮЩИХ ДОКУМЕНТОВ (АКТ, КС-2, КС-3, СЧЁТ) И УВЕДОМЛЕНИЙ (/api/v1/closing-docs & /api/v1/notifications)
+--------------------------------------------------------------------------------
+
+ВАЖНО — СКВОЗНОЙ КАСКАД СОХРАНЕНИЯ (`syncClosingDocToSourceAndLegal`):
+Любое сохранение документа (`POST /closing-docs`, `/close-volume`, `/invoices/issue`)
+выполняет 4 связанных действия в одной транзакции:
+  1) Upsert в `forms.closing_documents` (`saved_to_base=True`, генерация `content_text` с ИНН/КПП/ОГРН/банком субъекта 1С и клиента).
+  2) Дублирование/обновление записи в едином юридическом реестре `erp.contracts` с `id = "leg-" + doc.id`, `kind = "addendum"`, `status = "active"`, `in_knowledge_base = True` + запись в `erp.legal_history` (`action = "saved_to_base"`).
+  3) Синхронизация источника (`erp.rental_orders` или `crm.deals`): обновление номеров и флагов `act_saved_to_base`, `ks2_saved_to_base`, `ks3_saved_to_base`, `invoice_saved_to_base`, `total_amount` / `estimated_amount`, `paid_amount`, `debt_amount`. **Если это сделка CRM в статусе `completed`, а новый `debt_amount > 0` — сделка автоматически возвращается в `active` (`completed_at=None`, `archived_at=None`, `stage_updated_at=now()`).**
+  4) Генерация `erp.status_notifications` + отправка в `crm.client_communications` (если `send_to_branch_chat=True`) и в клиентский бот MAX (если `send_to_max_client_bot=True` и бот участка включён).
+
+1. GET /api/v1/closing-docs
+   - Query параметры: `branch_id`, `source_type` (order|deal), `source_id`, `kind` (act_services|ks2|ks3|invoice).
+   - Ответ (200 OK): List[ClosingDocumentRecord].
+
+2. POST /api/v1/closing-docs
+   - Описание: Сохранение Акта, КС-2, КС-3 или Счёта в базу закрывающих документов с выполнением сквозного каскада выше.
+   - Тело: ClosingDocumentRecord -> Ответ (201 Created): `{ "document": ClosingDocumentRecord, "notification": Optional[StatusNotificationItem] }`.
+
+3. POST /api/v1/closing-docs/close-volume
+   - Описание: Одновременное формирование и сохранение нормативных форм **Акт оказанных услуг**, **КС-2 (ОКУД 0322005)** и (при наличии `ks3_number`) **КС-3 (ОКУД 0322001)**, установка `act_signed=True`, расчёт НДС (`round(total * 20 / 120)` для ООО ОСНО, `0` для ИП УСН) и отправка уведомления.
+   - Тело: CloseVolumeRequest.
+   - Ответ (201 Created): `{ "act": ClosingDocumentRecord, "ks2": ClosingDocumentRecord, "ks3": Optional[ClosingDocumentRecord], "notification": StatusNotificationItem }`
+
+4. GET /api/v1/closing-docs/{id}/render
+   - Описание: Генерация печатной A4 HTML-версии (`generateNormativeActHtml` / `Ks2Html` / `Ks3Html` / `InvoiceHtml`), файла `.docx` или `.txt` по российским нормативам (ОКУД 0322005/0322001, банковское ПП, сумма прописью).
+   - Query: `format` = `html_a4` | `docx` | `txt`
+   - Ответ (200 OK): Поток документа с соответствующим `Content-Type` (инкрементирует `printed_count += 1`).
+
+5. POST /api/v1/closing-docs/invoices/issue
+   - Описание: Выставление счёта на оплату услуг за период по заказу или сделке, сохранение в базу, обновление статуса и оплаченной суммы и отправка уведомления.
+   - Тело: IssueInvoiceRequest -> Ответ (201 Created): `{ "invoice": ClosingDocumentRecord, "notification": StatusNotificationItem }`.
+
+6. PATCH /api/v1/closing-docs/invoices/{source_type}/{source_id}/status
+   - Описание: Изменение статуса оплаты счёта (`not_issued`, `issued`, `partially_paid`, `paid`, `overdue`), пересчёт `paid_amount` и `debt_amount`.
+   - **Инвариант CRM**: при `debt_amount > 0` на сделке в стадии `completed` она автоматически возвращается в `active` (`stage_updated_at = now()`, всплывает в топ колонки).
+   - Тело: UpdateInvoiceStatusRequest -> Ответ (200 OK): Обновлённые суммы и статус + `StatusNotificationItem`.
+
+7. GET /api/v1/notifications/settings  и  PUT /api/v1/notifications/settings
+   - Тело/Ответ: StatusNotificationSettings.
+
+8. GET /api/v1/notifications  и  POST /api/v1/notifications/mark-read
+   - GET Query: `branch_id`, `unread_only`.
+   - POST `/mark-read` Body (optional): `{ "branchId": "branch-hq" }` -> помечает прочитанными все уведомления участка (или все, если не задан).
+
+
+--------------------------------------------------------------------------------
+3.8. МОДУЛЬ ВОДИТЕЛЕЙ, ТАБЕЛЯ, ЗАМЕН И ЗАКАЗЧИКОВ (/api/v1/drivers & /api/v1/customers)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/drivers
+   - Query: `branch_id` (required для операционного контура «Поле Fleet Manager»). -> Ответ: List[DriverProfileResponse].
+
+2. POST /api/v1/drivers  и  PATCH /api/v1/drivers/{driver_id}
+   - Описание: Добавление водителя/машиниста (`DriverProfileCreate`), привязка к технике (`assigned_equipment_ids`), смене (`shift_1`/`shift_2`), статусу клиент-бота MAX, инлайн-редактирование ФИО/телефона (`DriverProfileUpdate`).
+   - Правило изоляции: подбор и закрепление водителей за техникой выполняет Fleet Manager конкретного участка в разделе «Поле Fleet Manager» строго в пределах своего `branch_id` (попытка привязать водителя другого участка отклоняется с `422 Unprocessable Entity`).
+
+3. PUT /api/v1/drivers/{driver_id}/timesheet
+   - Описание: Обновление кодов табеля Т-13 (`Я`, `Н`, `В`, `Б`, `О`) по датам месяца в таблице `driver.driver_timesheet_days`.
+   - Бизнес-логика (`TimesheetsView`):
+     * `Я` / `Н` записывают `worked_hours = 10.0`; `В` / `Б` / `О` записывают `worked_hours = 0.0`.
+     * Если выставлен код `Б` (больничный), на карточке водителя автоматически устанавливается `needs_replacement = True` (если в теле явно не передано иное).
+   - Тело: `{ "days": { "2026-11-01": "Я", "2026-11-02": "Б" } }` -> Ответ: `DriverProfileResponse`.
+
+4. PUT /api/v1/drivers/replacements/{equipment_id}  и  DELETE /api/v1/drivers/replacements/{equipment_id}
+   - Описание: Назначение или снятие оперативной замены водителя начальником участка (`FleetManager`) на странице своего участка («Поле Fleet Manager»). Заменяющий водитель обязан принадлежать тому же `branch_id`, что и `equipment_id` (иначе `422`).
+   - Тело PUT: DriverReplacementRecord -> Ответ (200 OK): DriverReplacementRecord.
+
+5. GET /api/v1/customers,  POST /api/v1/customers,  PATCH /api/v1/customers/{customer_id}
+   - Описание: CRUD обособленного справочника контрагентов участка (`customer.clients`: ИНН, КПП, ОГРН, банк/БИК/р/с/к/с, флаг `is_regular_max`, контакты и объекты для автоподстановки в `NewDealModal`, `CustomerCardModal`, `ClosingDocsModal` и `ContractsView`).
+   - Правило изоляции: каждый заказчик привязан к своему `primary_branch_id` (`UNIQUE (primary_branch_id, inn)`). Если редкий контрагент работает с двумя участками, в каждом `branch_id` он ведётся как отдельный заказчик со своими документами с префиксом участка.
+   - Query GET: `branch_id` (required для CRM/ERP участка), `search`. -> Тело POST/PATCH: `CustomerCreate` / `CustomerUpdate`.
+
+
+--------------------------------------------------------------------------------
+3.9. МОДУЛЬ КОРПОРАТИВНОГО ЧАТА, ФАЙЛОВ, LLM-АГЕНТА И БОТА MAX (/api/v1/chat, /api/v1/files, /api/v1/max-bot)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/chat/messages  и  POST /api/v1/chat/messages
+   - Query: `branch_id`, `deal_id`, `contact_phone`.
+   - Ответ: List[ChatMessageResponse].
+
+2. POST /api/v1/files/upload
+   - Описание: Multipart/form-data загрузка файлов и фото (`file: UploadFile`, `category: "requisites" | "site_photo" | "other"`) в объектную/файловую папку с возвратом URL в `preview_url` (в целевом FastAPI-бэкенде заменяет клиентские base64 DataURL из `FileReader`, чтобы не раздувать PostgreSQL JSONB).
+   - Ответ (201 Created): `FileUploadResponse`.
+
+3. POST /api/v1/chat/confirm-work
+   - Описание: Фиксация подтверждения часов, закрытия смены (ЭСМ-7) или объёма рейсов в чате и табеле.
+   - **Двойной серверный замок**: требует активной заявки (`has_active_request`) И включённого `admin_confirmation_allowed == True` (иначе `403`/`409`). Если передан `shift_id`, переводит смену в `status='approved'`.
+   - Тело: `{ "type": "hours|shift_close|volume_trips", "value": "12 ч", "shiftId": "...", "equipmentId": "...", "requestLabel": "...", "comment": "..." }`
+
+4. POST /api/v1/chat/agent  (реализовано в server.ts как POST /api/chat-agent)
+   - Описание: Встроенный LLM-агент раздела «Операционный чат» для мгновенного поиска фактов по базе предприятия (договоры, акты/КС-2/КС-3/счета, техника, водители, CRM, заказы, сменные рапорты, База знаний) и сводки по переписке чата с подготовкой черновика ответа.
+   - Модель по умолчанию: `gemini-4-hydrogen` (`ThinkingLevel.LOW`, `responseMimeType="application/json"` со строгой схемой `responseSchema`). Допустимые модели: `gemini-4-hydrogen`, `gemini-3.1-flash-lite`, `gemini-4-neon`, `gemini-4-carbon`, `gemini-4-argon`.
+   - Тело: `ChatAgentQueryRequest` (на FastAPI при переданном `branchId` срез данных читается напрямую из PostgreSQL без пересылки 9 массивов от клиента).
+   - Ответ (200 OK): `ChatAgentQueryResponse` (`answer`, `chatSummary`, `suggestedReply`, `matchedSources[]`).
+
+5. GET /api/v1/max-bot/config/{branch_id}  и  PUT /api/v1/max-bot/config/{branch_id}
+   - Описание: Настройки клиентского бота MAX по филиалу (`MaxCustomerBotConfig`).
+
+6. POST /api/v1/max-bot/webhook  и  POST /api/v1/max-bot/dispatch
+   - `/webhook`: Входящий webhook от бота MAX (новая заявка клиента -> создание `CRMDeal` с авто-маршрутом 1С при `auto_route_to_1c=True`; подтверждение часов; сообщение/фото в чат).
+   - `/dispatch`: Исходящее уведомление заказчику в мессенджер MAX (при срабатывании `StatusNotificationSettings.send_to_max_client_bot`).
+
+
+--------------------------------------------------------------------------------
+3.10. МОДУЛЬ ЮРИДИЧЕСКОГО РЕЕСТРА И БАЗЫ ЗНАНИЙ RAG (/api/v1/legal & /api/v1/knowledge)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/legal/documents  и  POST /api/v1/legal/documents
+   - Описание: Единый централизованный юридический реестр («Договоры и юротдел» — общий контур без принудительного разделения по участкам): договоры, допсоглашения (вкл. сохранённые Акты/КС-2/КС-3/Счета), споры, претензии и шаблоны. Опциональная фильтрация по `branch_id`, `kind`, `status`, `search`.
+   - Ролевой контроль (`LegalRole`): для роли `accountant` все мутирующие запросы возвращают `403 Forbidden`. При `kind` ∈ `{dispute, claim}` в `erp.legal_history` пишется `action='dispute_opened'`, иначе `'created'`.
+
+2. PATCH /api/v1/legal/documents/{doc_id}
+   - Описание: Редактирование названия, текста, статуса или `dispute_reason`/`dispute_amount_rub` с обязательной записью в `erp.legal_history` (`status_changed` или `updated`).
+   - Тело: `LegalDocumentUpdate` -> Ответ (200 OK): `LegalDocumentResponse`.
+
+3. POST /api/v1/legal/documents/import
+   - Описание: Пакетный импорт документов в единый юридический реестр (`ContractsView` из `.xlsx`, `.xls`, `.csv`, `.txt`, `.json`) с фиксацией `action='imported'` в `erp.legal_history` по каждому документу.
+   - Тело: `List[LegalDocumentCreate]` (или Multipart file) -> Ответ (201 Created): `List[LegalDocumentResponse]`.
+
+4. POST /api/v1/legal/documents/auto-from-customer
+   - Описание: Автоматическое открытие существующего договора контрагента или генерация нового договора аренды (префикс из `branch.documentFlow.orderPrefix`) либо счёта-оферты (`ОФР-{branch.code}-...`) из карточки заказчика (`CustomerCardModal`) с подстановкой полных банковских/налоговых реквизитов.
+   - Тело: `AutoCustomerContractRequest` -> Ответ (200 OK / 201 Created): `LegalDocumentResponse`.
+
+5. POST /api/v1/legal/documents/{doc_id}/publish-to-kb
+   - Описание: Осознанная передача документа в общую «Базу знаний» в режиме обезличенного образца (`anonymized`, скрытие контрагента, ИНН/КПП/ОГРН/р/с/паспортов/телефонов/email по правилам `anonymizeLegalText`) или полного текста (`full`). Устанавливает `in_knowledge_base=True` и пишет `saved_to_base` в `erp.legal_history`. Если в `system_admin_config.knowledge_rag.auto_reindex_on_save == True`, ставит чанки в очередь переиндексации.
+   - Тело: `LegalPublishToKbRequest` -> Ответ (201 Created): `KnowledgeDocResponse`.
+
+6. GET /api/v1/legal/documents/{doc_id}/export  и  POST /api/v1/legal/export-log
+   - GET Query: `format` = `docx | pdf | xlsx | txt | html | json`, `anonymize` (bool), `include_metadata` (bool) — всегда экспортирует строго 1 целевой документ (массовая выгрузка всей базы отключена) и фиксирует `action='exported'` в `erp.legal_history`.
+   - POST `/export-log`: Фиксация факта клиентской выгрузки (`pdf` print / `.docx`) в неизменяемом журнале `erp.legal_history` (`LegalExportLogRequest`).
+
+7. GET /api/v1/legal/history
+   - Описание: Неизменяемый аудит-лог юридических действий (`created`, `updated`, `imported`, `exported`, `saved_to_base`, `status_changed`, `dispute_opened`).
+   - Ответ (200 OK): `List[LegalHistoryEntryResponse]`.
+
+8. GET /api/v1/knowledge/docs  и  POST /api/v1/knowledge/docs
+   - Описание: Управление документами корпоративной базы знаний (`KnowledgeCategory`).
+
+9. POST /api/v1/knowledge/search  и  POST /api/v1/knowledge/reindex
+   - Описание: Векторный/гибридный поиск чанков `pgvector` / FAISS (`topK`, `min_similarity`) и переиндексация по выбранным категориям `indexed_categories` с обновлением `last_indexed_at`.
+
+
+--------------------------------------------------------------------------------
+3.11. МОДУЛЬ ИНТЕГРАЦИИ 1С И МАРШРУТИЗАЦИИ ООО / ИП (/api/v1/integrations/1c)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/integrations/1c/config  и  PUT /api/v1/integrations/1c/config
+   - Описание: Получение/сохранение параметров подключения 1С (OData v3 / REST HTTP-сервис) для `ooo_specialtech` (ОСНО 20%) и `ip_specialtechnica` (УСН 6%) и правил маршрутизации `OneCRoutingRules`.
+
+2. POST /api/v1/integrations/1c/test-connection  (реализовано в server.ts как POST /api/1c/test-connection)
+   - Тело: `{ "subjectId": "ooo_specialtech", "entityName": "...", "odataUrl": "https://...", "apiLogin": "...", "exchangeFormat": "odata_v3" }`
+   - Ответ (200 OK): `{ "connected": true, "checkedAt": "2026-11-21 10:00", "message": "..." }`
+
+3. POST /api/v1/integrations/1c/routing/resolve
+   - Тело: `{ "client_type": "legal_entity|individual", "has_contract": true }`
+   - Ответ (200 OK): `{ "subject_id": "ooo_specialtech", "reason": "...", "document_package": [...] }`
+
+4. POST /api/v1/integrations/1c/sync  и  GET /api/v1/integrations/1c/sync-logs
+   - Описание: Пакетная выгрузка заказов, Актов, КС-2, КС-3, счетов и табелей в 1С.
+
+
+--------------------------------------------------------------------------------
+3.12. МОДУЛЬ АДМИНИСТРИРОВАНИЯ (/api/v1/admin)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/admin/config  и  PUT /api/v1/admin/config
+   - Описание: Полная конфигурация `SystemAdminConfig` (таблицы `tables`, `llm`, `knowledge_rag`, `telemetry_sensors`, матрица прав `access_policies`).
+
+2. PUT /api/v1/admin/roles/{role_id}
+   - Описание: Настройка прав доступа к страницам (`edit | view | hidden`) и полям (`canViewFinancialMargin`, `canEditPayroll`, `canApproveShifts`, `canViewDriverMaxPhones`, `canEditKnowledgeBase`, `canAccessFixedCostsTable`, `canAccessVariableCostsTable`).
+   - Тело/Ответ: `RoleAccessPolicy`.
+
+3. PUT /api/v1/admin/tables/{table_id}
+   - Описание: Конфигурация колонок, плотности и пагинации для таблиц `fleet`, `rentals`, `timesheets`, `contracts`, `crm`.
+   - Тело/Ответ: `TableViewSettings`.
+
+4. PUT /api/v1/admin/llm  и  POST /api/v1/admin/llm/test-connection
+   - Описание: Настройка модели (`gemini-4-hydrogen`), `maxOutputTokens`, `contextWindowTokens`, `thinkingTokenBudget`, `temperature`, `topP`, системного промпта и проверка прокси (`/api/ai-analyst`).
+
+5. PUT /api/v1/admin/rag
+   - Описание: Настройка `RagBaseAdminSettings` (`storageMode`, `vectorEngine`, `embeddingModel`, `chunkSizeTokens`, `chunkOverlapTokens`, `topK`, `minSimilarity`).
+
+6. PATCH /api/v1/admin/confirmation-gate
+   - Описание: Переключение глобального флага разрешения администратора (`admin_confirmation_allowed`) для подтверждения смен и объёмов (`TimesheetsView`, `FleetManagerView`). Сохраняется в `meta.system_admin_config.admin_confirmation_allowed`.
+   - Тело: `ConfirmationGatePatch` -> Ответ (200 OK): `{ "adminConfirmationAllowed": true }`.
+
+
+--------------------------------------------------------------------------------
+3.13. МОДУЛЬ AI БИЗНЕС-АНАЛИТИКА И АУДИТА (/api/v1/ai)
+--------------------------------------------------------------------------------
+
+1. POST /api/v1/ai/query  (реализовано в server.ts как POST /api/ai-analyst)
+   - Описание: Запрос к мультиагентной системе AI-аналитика (`executive`, `profitability`, `audit`, `crm`, `maintenance`, `legal`) с передачей среза данных участка и опциональной конфигурации `llmConfig`. При отсутствии `GEMINI_API_KEY` срабатывает детерминированный `local_expert_engine_fallback`.
+   - Тело запроса:
+     {
+       "query": "Сравни рентабельность гусеничных экскаваторов и автокранов за месяц",
+       "agentType": "profitability",
+       "contextData": { "branch": {...}, "summary": {...}, "topUnits": [...], "anomalies": [...], "accounting1C": {...} },
+       "llmConfig": { "model": "gemini-4-hydrogen", "maxOutputTokens": 4096, "temperature": 0.2, "topP": 0.9, "systemInstructionSuffix": "..." }
+     }
+   - Ответ (200 OK):
+     {
+       "success": true,
+       "source": "gemini_4_hydrogen",
+       "data": {
+         "role": "...",
+         "executiveSummary": "...",
+         "keyFindings": [...],
+         "calculatedMetrics": {...},
+         "actionableSteps": [...]
+       }
+     }
+
+2. GET /api/v1/ai/anomalies/active
+   - Query: `branch_id`. -> Ответ (200 OK): List[AnomalyAlert].
+
+3. PATCH /api/v1/ai/anomalies/{anomaly_id}/resolve
+   - Описание: Отметка инцидента/аномалии как отработанной.
+
+
+--------------------------------------------------------------------------------
+3.14. МОДУЛЬ ОБМЕНА ДАННЫМИ EXCEL (.XLSX) (/api/v1/exchange/excel)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/exchange/excel/export
+   - Query: `scope` = all | fleet | shifts | orders | branches_summary | timesheet_t13, `branch_id`, `period_label`.
+   - Ограничение изоляции:
+     * Для операционного обмена (`all | fleet | shifts | orders`) параметр `branch_id` **обязателен** (значение `"all"` запрещено — `400 Bad Request`): выгрузка формируется строго по одному конкретному участку.
+     * Режим `branches_summary` является сводно-аналитическим отчётом руководителя (`AllBranchesFinancialTables`) и формирует 3 листа (`Прибыли по участкам`, `Расходы по филиалам`, `Сводный расчёт` — соответствует `exportBranchesSummaryToExcel` в `excelUtils.ts`).
+     * Режим `timesheet_t13` формирует табель выходов машинистов (`TimesheetsView`) по выбранному участку.
+   - Заголовки: `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`.
+
+2. POST /api/v1/exchange/excel/import
+   - Форма: Multipart/form-data (`file: UploadFile`, `mode: "merge" | "replace"`, `branch_id`: required, `"all"` запрещено -> `400 Bad Request`).
+   - Поведение при `replace`: заменяются строго записи только указанного `branch_id` (данные остальных участков не затрагиваются никогда). При `merge` техника сопоставляется по `(branch_id, inventory_number)`, а заказы — по `(branch_id, order_number)`. Все импортируемые строки принудительно привязываются к `branch_id`.
+   - Ответ (200 OK): `{ "success": true, "branchId": "branch-hq", "importedUnits": 14, "importedShifts": 48, "importedOrders": 6, "mode": "merge" }`
+
+
+--------------------------------------------------------------------------------
+3.15. МОДУЛЬ БОТА ВОДИТЕЛЯ, КОРПОРАТИВНЫХ КАРТ И ПЕРЕЛИВА ГСМ (/api/v1/driver-bot)
+--------------------------------------------------------------------------------
+
+1. POST /api/v1/driver-bot/card-expenses
+   - Описание: Фиксация оплаты по корпоративной карте водителя (`fuel_own_tank`, `fuel_for_equipment`, `parts`, `other`) из десктопной формы «Регистрация смены машиниста» или персонального бота водителя в MAX.
+   - Бизнес-логика 5-звенной связки и изоляция участка: Сервер проверяет единый `branch_id` для связки `driver_id` + `card_last4` + `source_equipment_id` + (`client_id` / `order_id` / `deal_id` / `shift_report_id`). При `payment_category == "fuel_for_equipment"` стоимость топлива перебрасывается с карты оплатившего водителя на экономику принимающей техники (`target_equipment_id`), также строго в пределах того же `branch_id` (иначе `422 Unprocessable Entity`: межфилиальный перелив ГСМ невозможен).
+   - Ответ (201 Created): DriverCardExpenseResponse.
+
+2. GET /api/v1/driver-bot/monthly-reconciliation/{driver_id}
+   - Описание: Сводный ежемесячный отчёт водителя по корпоративной карте, переливам ГСМ и дневным логам отклонений (`fuel_audit_logs`).
+   - Query параметры: `month` (YYYY-MM).
+
+
+--------------------------------------------------------------------------------
+3.16. МОДУЛЬ ТЕЛЕМЕТРИИ ГЛОНАСС, ДУТ И CAN-ШИНЫ (/api/v1/telemetry)
+--------------------------------------------------------------------------------
+
+1. GET /api/v1/telemetry/settings  и  PUT /api/v1/telemetry/settings
+   - Описание: Получение и сохранение конфигурации телематики `TelemetrySensorsAdminSettings` (провайдер `wialon_ips | omnicomm | galileosky | scout_api | egts_ru`, протокол `wialon_ips_v2 | egts | rest_json | mqtt_telemetry`, пороги ДУТ слива/заправки, допуск расхождения моточасов CAN, геозона, автоуведомления в чат).
+   - Тело/Ответ: `TelemetrySensorsAdminSettings`.
+
+2. POST /api/v1/telemetry/test-connection  (реализовано в server.ts как POST /api/telemetry/test-connection)
+   - Описание: Проверка доступности внешнего шлюза телематики (HTTP HEAD проба с таймаутом 2.5 сек и валидация параметров).
+   - Тело: `TelemetryConnectionTestRequest` -> Ответ (200 OK): `TelemetryConnectionTestResponse`.
+
+3. PUT /api/v1/telemetry/bindings/{equipment_id}
+   - Описание: Привязка IMEI трекера ГЛОНАСС и флагов ДУТ / CAN-шины к конкретной единице техники парка.
+   - Тело: `TelemetryEquipmentBinding` -> Ответ (200 OK): `TelemetryEquipmentBinding`.
+
+4. POST /api/v1/telemetry/webhook
+   - Описание: Приём телеметрических пакетов (координаты, ДУТ уровень бака, моточасы CAN, зажигание/ВОМ, осевая нагрузка, наклон стрелы, температура гидравлики) в `fleet.equipment_telemetry_daily` с автозапуском триггеров аудита ГСМ (`audit.anomaly_alerts`, `audit.fuel_audit_logs`).
+
+
+================================================================================
+4. ЧЕК-ЛИСТ СКВОЗНОЙ БИЗНЕС-ЛОГИКИ FRONTEND ДЛЯ РЕАЛИЗАЦИИ В FASTAPI SERVICES
+================================================================================
+1. **2-контурная модель и единый поток водителя (`branches.service.py`, `timesheets.service.py`, `driver_bot.service.py`)**:
+   - **Контур А — Выделенный операционный поток по `branch_id`** (форма «Регистрация смены машиниста» и персональный бот водителя в мессенджере MAX):
+     жёсткая 5-звенная связка **Водитель (`driver_id` + MAX) ↔ Участок (`branch_id`) ↔ Техника (`equipment_id`) ↔ Корпоративная карта (`card_last4` / подотчётные расходы ГСМ и платежи) ↔ Заказчик (`client_id`/`client_name` + заявка/заказ `deal_id`/`order_id`)**.
+     Также по `branch_id` обособлены: управляющее звено участка (`Fleet Manager` + `Главный механик участка`), ТО и обмен Excel (`.xlsx`). Если редкий заказчик работает с двумя участками — ведётся как отдельный контрагент в каждом `branch_id` с префиксом участка (консолидация возможна на уровне 1С за контуром автоматизации).
+   - **Контур Б — Всё остальное не разделяется принудительно (централизованные / сводно-аналитические модули)**: «Договоры и юротдел» (`ContractsView` / `erp.contracts`), общие справочники и База знаний RAG (`rag`), дашборды руководителя и сводные таблицы (`AllBranchesFinancialTables`, `AdminCostTablesSection`, экспорт `branches_summary`) — работают как единые модули или выборки из баз участков для анализа и корректировки руководителем.
+   - При смене префиксов участка каскад обязан обновить все 7 связанных таблиц и перегенерировать `forms.closing_documents.content_text`.
+2. **Расчёт прибыли, постоянных и прямых затрат (`analytics.service.py`)**:
+   - Математическая модель 1:1 соответствует `src/utils/periodAnalytics.ts` (суточные смены, помесячная база `activeDataYearMonth` + сезонные коэффициенты при просмотре других месяцев/года, распределение 5 категорий постоянных расходов `1/30` на день, `1×` на месяц, `N×` на год).
+   - Самосвалы (`dump_truck`) в рейтинге выделяются отдельным блоком с пробегом `mileageKm` и рейсами `tripsCount`.
+3. **Запрет блокировок по ГСМ + внутриучастковый перелив (`timesheets.service.py`)**:
+   - Любой перерасход (> +20% в смене или превышение ДУТ) фиксируется как `status='anomaly'` + `audit.anomaly_alerts` + `audit.fuel_audit_logs`, но НИКОГДА не блокирует ввод смены.
+   - При `paymentCategory == 'fuel_for_equipment'` расход ГСМ переносится на `paymentTargetEquipmentId` **строго в пределах того же `branch_id`** (перелив ГСМ между разными участками запрещён на уровне API и составным FK в PostgreSQL).
+4. **Двойной замок закрытия смен и подтверждений (`admin.service.py` + `timesheets.service.py`)**:
+   - Нельзя нажать/выполнить `approve` смены или `chat/confirm-work`, если `adminConfirmationAllowed == False` ИЛИ на участке нет ни одной активной сделки/заказа (`hasActiveRequest`).
+5. **Автоподбор и замены экипажа строго внутри участка (`driver_assignment.py`)**:
+   - Подбор и замену водителей на конкретном участке выполняет Fleet Manager этого участка в «Поле Fleet Manager» строго среди водителей данного `branch_id`.
+   - Приоритет выбора водителя при создании смены или CRM-заявки (строго `driver.branch_id == equipment.branch_id`): 1) оперативная замена Fleet Manager (`driver_equipment_bindings.is_temporary_replacement`), 2) водитель сменного графика по табелю (`shift_1` / `shift_2` при наличии кода `Я`/`Н` и отсутствии `Б`/`О`), 3) основной закреплённый водитель.
+6. **Воронка CRM, лимит смен, 48-часовая ретенция и дебиторка (`crm.service.py`)**:
+   - Нельзя закрыть сделку в `completed`, если нет закрытых документов (Акт/КС-2/КС-3) или `debtAmount > 0`.
+   - По заявке CRM допускается не более 2 смен на календарную дату (`shiftSlot: 1 | 2`, `1..12` ч).
+   - Сделка в `completed` с нулевым долгом видна 48 часов, затем переносится в архив (`archivedAt`); появление долга (`debtAmount > 0`) мгновенно возвращает её в `active` на верх списка (`stageUpdatedAt`).
+7. **Единый контур закрывающих документов и маршрутизации 1С (`closing_docs.service.py`)**:
+   - ЮЛ (договор) → `ooo_specialtech` (ОСНО, выделение НДС `round(total * 20 / 120)`); ФЛ (договор или оферта) → `ip_specialtechnica` (УСН 6%, НДС = 0).
+   - Каждый сохранённый Акт, КС-2, КС-3 или Счёт автоматически дублируется в `erp.contracts` (`leg-cdoc-*`), логируется в `erp.legal_history` и вызывает уведомления (`StatusNotificationSettings`) в ERP, чат и MAX.
+8. **Изоляция базы юриста и обмен Excel (`legal.service.py`, `rag.service.py`, `exchange_excel.py`)**:
+   - Прямая массовая выгрузка реестра запрещена (экспорт строго 1 документа за шаг). Передача в общую `rag.knowledge_documents` выполняется только через осознанное подтверждение с обезличиванием (`anonymizeLegalText`).
+   - Операционный обмен данными Excel (`.xlsx`) разрешён строго по одному конкретному `branch_id` (исключение — сводный экспорт руководителя `branches_summary`).
+================================================================================
+
